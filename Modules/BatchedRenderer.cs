@@ -178,7 +178,11 @@ namespace SevenDtDAibot.Modules
                 
                 foreach (var line in group.Value)
                 {
-                    Render.DrawLine(line.start, line.end, line.color, line.thickness);
+                    GL.Begin(GL.LINES);
+GL.Color(line.color);
+GL.Vertex3(line.start.x, line.start.y, 0);
+GL.Vertex3(line.end.x, line.end.y, 0);
+GL.End();
                 }
                 
                 _batchedDrawCalls++;
@@ -212,7 +216,14 @@ namespace SevenDtDAibot.Modules
                 
                 foreach (var box in group.Value)
                 {
-                    Render.DrawBox(box.x, box.y, box.width, box.height, box.color, box.thickness);
+                    // Draw box using GL lines
+                    GL.Begin(GL.LINES);
+                    GL.Color(box.color);
+                    GL.Vertex3(box.x, box.y, 0);
+                    GL.Vertex3(box.x + box.width, box.y, 0);
+                    GL.Vertex3(box.x + box.width, box.y + box.height, 0);
+                    GL.Vertex3(box.x, box.y + box.height, 0);
+                    GL.End();
                 }
                 
                 _batchedDrawCalls++;
@@ -245,7 +256,17 @@ namespace SevenDtDAibot.Modules
                 
                 foreach (var circle in group.Value)
                 {
-                    Render.DrawCircle(circle.center, (int)circle.radius, circle.color, 1f, false, circle.segments);
+                    // Draw circle using GL lines
+                    GL.Begin(GL.LINES);
+                    GL.Color(circle.color);
+                    for (int i = 0; i <= circle.segments; i++)
+                    {
+                        float angle = (float)i / circle.segments * 2f * Mathf.PI;
+                        float x = circle.center.x + Mathf.Cos(angle) * circle.radius;
+                        float y = circle.center.y + Mathf.Sin(angle) * circle.radius;
+                        GL.Vertex3(x, y, 0);
+                    }
+                    GL.End();
                 }
                 
                 _batchedDrawCalls++;
@@ -279,7 +300,9 @@ namespace SevenDtDAibot.Modules
                 
                 foreach (var text in group.Value)
                 {
-                    Render.DrawString(text.position, text.text);
+                    // Draw text using GUI
+                    GUI.color = Color.white;
+                    GUI.Label(new Rect(text.position.x, text.position.y, 200, 20), text.text);
                 }
                 
                 _batchedDrawCalls++;

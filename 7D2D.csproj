@@ -296,6 +296,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Loader.cs" />
+    <Compile Include="Hacks.cs" />
     <Compile Include="Modules\Aimbot.cs" />
     <Compile Include="Modules\BatchedRenderer.cs" />
     <Compile Include="Modules\Config.cs" />

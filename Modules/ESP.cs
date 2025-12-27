@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,7 +82,7 @@ namespace SevenDtDAibot.Modules
 
                 if (UI.t_ESPLines)
                 {
-                    Render.DrawLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
+                    BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                 }
 
                 if (UI.t_EnemyBones)
@@ -247,7 +247,7 @@ namespace SevenDtDAibot.Modules
 
                 if (UI.t_ESPLines)
                 {
-                    Render.DrawLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
+                    BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                 }
             }
         }
@@ -297,7 +297,7 @@ namespace SevenDtDAibot.Modules
                 {
                     if (entity != localPlayer)
                     {
-                        Render.DrawLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
+                        BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                     }
                 }
 
@@ -335,7 +335,7 @@ namespace SevenDtDAibot.Modules
                 }
                 if (UI.t_ESPLines)
                 {
-                    Render.DrawLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
+                    BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                 }
             }
         }
@@ -355,7 +355,7 @@ namespace SevenDtDAibot.Modules
             );
             
             // Render the line using the pooled data
-            Render.DrawLine(lineData.start, lineData.end, lineData.color, lineData.thickness);
+            BatchedRenderer.AddLine(lineData.start, lineData.end, lineData.color, lineData.thickness);
             
             // Return to pool for reuse
             ESPPool.ReturnLine(lineData);
@@ -385,7 +385,7 @@ namespace SevenDtDAibot.Modules
             );
 
             // Render the box using the pooled data
-            Render.DrawBox(boxData.x, boxData.y, boxData.width, boxData.height, boxData.color, boxData.thickness);
+            BatchedRenderer.AddBox(boxData.x, boxData.y, boxData.width, boxData.height, boxData.color, boxData.thickness);
             
             if (!string.IsNullOrEmpty(boxData.text))
             {
@@ -395,7 +395,7 @@ namespace SevenDtDAibot.Modules
                     boxData.text,
                     Color.white
                 );
-                Render.DrawString(textData.position, textData.text);
+                BatchedRenderer.AddText(textData.position, textData.text, Color.white);
                 ESPPool.ReturnText(textData);
                 ESPPool.IncrementTextCount();
             }
@@ -417,7 +417,7 @@ namespace SevenDtDAibot.Modules
                 objColor
             );
             
-            Render.DrawString(textData.position, textData.text);
+            BatchedRenderer.AddText(textData.position, textData.text, Color.white);
             
             ESPPool.ReturnText(textData);
             ESPPool.IncrementTextCount();
