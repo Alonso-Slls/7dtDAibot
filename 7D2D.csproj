@@ -296,21 +296,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Loader.cs" />
-    <Compile Include="Modules\Aimbot.cs" />
-    <Compile Include="Modules\BatchedRenderer.cs" />
-    <Compile Include="Modules\Config.cs" />
-    <Compile Include="Modules\DetailedLogger.cs" />
-    <Compile Include="Modules\ESPPool.cs" />
-    <Compile Include="Modules\ESPRenderer.cs" />
-    <Compile Include="Modules\EntityManager.cs" />
-    <Compile Include="Modules\EntitySubscription.cs" />
-    <Compile Include="Modules\EntityTracker.cs" />
-    <Compile Include="Modules\ErrorHandler.cs" />
-    <Compile Include="Modules\ESP.cs" />
-    <Compile Include="Modules\HacksManager.cs" />
-    <Compile Include="Modules\Hotkeys.cs" />
-    <Compile Include="Modules\SpatialGrid.cs" />
-    <Compile Include="Modules\UI.cs" />
+    <Compile Include="ESPManager.cs" />
+    <Compile Include="RobustDebugger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
