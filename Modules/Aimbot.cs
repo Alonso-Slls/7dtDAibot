@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -40,7 +40,7 @@ namespace SevenDtDAibot.Modules
 
             Vector2 target = Vector2.zero;
 
-            if (UI.t_TAnimals)
+            if (Config.Settings.TargetAnimals)
             {
                 foreach (EntityAnimal animal in EntityTracker<EntityAnimal>.Instance.GetAllEntities())
                 {
@@ -78,7 +78,7 @@ namespace SevenDtDAibot.Modules
                 }
             }
 
-            if (UI.t_TPlayers)
+            if (Config.Settings.TargetPlayers)
             {
                 foreach (EntityPlayer player in EntityTracker<EntityPlayer>.Instance.GetAllEntities())
                 {
@@ -116,7 +116,7 @@ namespace SevenDtDAibot.Modules
                 }
             }
 
-            if (UI.t_TEnemies) {
+            if (Config.Settings.TargetEnemies) {
                 foreach (EntityEnemy enemy in EntityTracker<EntityEnemy>.Instance.GetAllEntities())
                 {
                     if (enemy && enemy.IsAlive())
@@ -165,10 +165,10 @@ namespace SevenDtDAibot.Modules
                     double distY = target.y - Screen.height / 2f;
 
                     // Choose aiming method based on settings
-                    if (UI.t_AIM && UI.t_AAIM)
+                    if (Config.Settings.AimbotEnabled && Config.Settings.AutoAim)
                     {
                         // Use SetCursorPos for direct positioning (more precise)
-                        if (UI.t_AimRaw)
+                        if (Config.Settings.AimbotRaw)
                         {
                             // Direct cursor positioning for instant aim
                             SetCursorPos(Screen.width / 2 + (int)distX, Screen.height / 2 + (int)distY);
@@ -176,7 +176,7 @@ namespace SevenDtDAibot.Modules
                         else
                         {
                             // Smooth aiming with mouse_event
-                            float smoothFactor = UI.t_AimSmooth;
+                            float smoothFactor = Config.Settings.AimSmooth;
                             
                             // Different smoothing for different weapon types
                             if (IsBowWeapon())

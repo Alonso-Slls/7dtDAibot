@@ -15,34 +15,34 @@ namespace SevenDtDAibot.Modules
     {
         public static bool Menu = false;
         //******* ESP Toggle Variables ********
-        public static bool t_ESP = false;
-        public static bool t_EnemyESP = false;
-        public static bool t_EnemyBones = false;
-        public static bool t_ItemESP = false;
-        public static bool t_NPCESP = false;
-        public static bool t_PlayerESP = false;
-        public static bool t_AnimalESP = false;
-        public static bool t_ESPLines = false;
-        public static bool t_ESPBoxes = true;
+
+
+
+
+
+
+
+
+
 
         //******* Aimbot Toggle Variables ********
-        public static bool t_AIM = false;
-        public static bool t_AAIM = false;
 
-        public static bool t_TEnemies = false;
-        public static bool t_TAnimals = false;
-        public static bool t_TPlayers = false;
-        public static bool t_TFOV = false;
+
+
+
+
+
+
         
         // Aim tuning
-        public static int t_AimFOV = Config.DEFAULT_AIM_FOV;
-        public static float t_AimSmooth = Config.DEFAULT_AIM_SMOOTH;
-        public static bool t_DebugOverlay = true;
-        public static bool t_AimRaw = false; // Direct cursor positioning mode
+
+
+
+
 
         // FOV-Aware ESP Settings
-        public static bool t_FOVAwareESP = true;
-        public static float t_FOVThreshold = Config.DEFAULT_FOV_THRESHOLD;
+
+
         
         // Legacy compatibility
         public static string dbg = "debug";
@@ -169,7 +169,7 @@ namespace SevenDtDAibot.Modules
             GUILayout.EndArea();
             
             // ESP Submenu
-            if (t_ESP)
+            if (Config.Settings.ESPEnabled)
             {
                 GUILayout.BeginArea(new Rect(Config.WINDOW_WIDTH + Config.PADDING * 2, Config.PADDING, Config.SUBMENU_WIDTH, Config.ESP_SUBMENU_HEIGHT), windowStyle);
                 DrawESPMenu();
@@ -177,7 +177,7 @@ namespace SevenDtDAibot.Modules
             }
             
             // Aimbot Submenu
-            if (t_AIM)
+            if (Config.Settings.AimbotEnabled)
             {
                 GUILayout.BeginArea(new Rect(Config.WINDOW_WIDTH + Config.PADDING * 2, Config.PADDING, Config.SUBMENU_WIDTH, Config.AIMBOT_SUBMENU_HEIGHT), windowStyle);
                 DrawAimbotMenu();
@@ -185,7 +185,7 @@ namespace SevenDtDAibot.Modules
             }
             
             // Debug Overlay
-            if (t_DebugOverlay)
+            if (Config.Settings.DebugOverlay)
             {
                 DrawDebugOverlay();
             }
@@ -202,19 +202,19 @@ namespace SevenDtDAibot.Modules
             GUILayout.Space(SPACING);
             
             // ESP Toggle
-            GUI.color = t_ESP ? accentColor : Color.white;
+            GUI.color = Config.Settings.ESPEnabled ? accentColor : Color.white;
             if (GUILayout.Button("ESP System [ON/OFF]", buttonStyle, GUILayout.Height(BUTTON_HEIGHT)))
             {
-                t_ESP = !t_ESP;
-                if (t_ESP) t_AIM = false; // Exclusive menus
+                Config.Settings.ESPEnabled = !Config.Settings.ESPEnabled;
+                ; // Exclusive menus
             }
             
             // Aimbot Toggle
-            GUI.color = t_AIM ? accentColor : Color.white;
+            GUI.color = Config.Settings.AimbotEnabled ? accentColor : Color.white;
             if (GUILayout.Button("Aimbot System [ON/OFF]", buttonStyle, GUILayout.Height(BUTTON_HEIGHT)))
             {
-                t_AIM = !t_AIM;
-                if (t_AIM) t_ESP = false; // Exclusive menus
+                Config.Settings.AimbotEnabled = !Config.Settings.AimbotEnabled;
+                ; // Exclusive menus
             }
             
             GUI.color = Color.white;
@@ -223,15 +223,15 @@ namespace SevenDtDAibot.Modules
             // Quick Status
             GUILayout.BeginVertical(boxStyle);
             GUILayout.Label("Status:", labelStyle);
-            GUILayout.Label($"ESP: {(t_ESP ? "Active" : "Inactive")}", labelStyle);
-            GUILayout.Label($"Aimbot: {(t_AIM ? "Active" : "Inactive")}", labelStyle);
-            GUILayout.Label($"FOV-Aware: {(t_FOVAwareESP ? "Enabled" : "Disabled")}", labelStyle);
+            GUILayout.Label($"ESP: {(Config.Settings.ESPEnabled ? "Active" : "Inactive")}", labelStyle);
+            GUILayout.Label($"Aimbot: {(Config.Settings.AimbotEnabled ? "Active" : "Inactive")}", labelStyle);
+            GUILayout.Label($"FOV-Aware: {(Config.Settings.FOVAwareESP ? "Enabled" : "Disabled")}", labelStyle);
             GUILayout.EndVertical();
             
             GUILayout.Space(SPACING);
             
             // Debug info
-            if (t_DebugOverlay)
+            if (Config.Settings.DebugOverlay)
             {
                 GUILayout.BeginVertical(boxStyle);
                 GUILayout.Label("Debug Info:", labelStyle);
@@ -251,25 +251,29 @@ namespace SevenDtDAibot.Modules
             GUILayout.Label("ESP Configuration", labelStyle);
             GUILayout.Space(SPACING);
             
+            // Main ESP Toggle
+            Config.Settings.ESPEnabled = GUILayout.Toggle(Config.Settings.ESPEnabled, "Enable ESP", toggleStyle);
+            GUILayout.Space(SPACING);
+            
             // ESP Options - Two columns
             GUILayout.BeginHorizontal();
             
             // Left Column
             GUILayout.BeginVertical();
-            t_EnemyESP = GUILayout.Toggle(t_EnemyESP, "Enemy ESP", toggleStyle);
-            t_ItemESP = GUILayout.Toggle(t_ItemESP, "Item ESP", toggleStyle);
-            t_NPCESP = GUILayout.Toggle(t_NPCESP, "NPC ESP", toggleStyle);
-            t_PlayerESP = GUILayout.Toggle(t_PlayerESP, "Player ESP", toggleStyle);
-            t_AnimalESP = GUILayout.Toggle(t_AnimalESP, "Animal ESP", toggleStyle);
+            Config.Settings.EnemyESP = GUILayout.Toggle(Config.Settings.EnemyESP, "Enemy ESP", toggleStyle);
+            Config.Settings.ItemESP = GUILayout.Toggle(Config.Settings.ItemESP, "Item ESP", toggleStyle);
+            Config.Settings.NPCESP = GUILayout.Toggle(Config.Settings.NPCESP, "NPC ESP", toggleStyle);
+            Config.Settings.PlayerESP = GUILayout.Toggle(Config.Settings.PlayerESP, "Player ESP", toggleStyle);
+            Config.Settings.AnimalESP = GUILayout.Toggle(Config.Settings.AnimalESP, "Animal ESP", toggleStyle);
             GUILayout.EndVertical();
             
             GUILayout.Space(SPACING);
             
             // Right Column
             GUILayout.BeginVertical();
-            t_EnemyBones = GUILayout.Toggle(t_EnemyBones, "Enemy Bones", toggleStyle);
-            t_ESPLines = GUILayout.Toggle(t_ESPLines, "Draw Lines", toggleStyle);
-            t_ESPBoxes = GUILayout.Toggle(t_ESPBoxes, "Draw Boxes", toggleStyle);
+            Config.Settings.EnemyBones = GUILayout.Toggle(Config.Settings.EnemyBones, "Enemy Bones", toggleStyle);
+            Config.Settings.ESPLines = GUILayout.Toggle(Config.Settings.ESPLines, "Draw Lines", toggleStyle);
+            Config.Settings.ESPBoxes = GUILayout.Toggle(Config.Settings.ESPBoxes, "Draw Boxes", toggleStyle);
             GUILayout.EndVertical();
             
             GUILayout.EndHorizontal();
@@ -279,12 +283,12 @@ namespace SevenDtDAibot.Modules
             // FOV-Aware Settings
             GUILayout.BeginVertical(boxStyle);
             GUILayout.Label("FOV-Aware Settings:", labelStyle);
-            t_FOVAwareESP = GUILayout.Toggle(t_FOVAwareESP, "Enable FOV-Aware ESP", toggleStyle);
+            Config.Settings.FOVAwareESP = GUILayout.Toggle(Config.Settings.FOVAwareESP, "Enable FOV-Aware ESP", toggleStyle);
             
-            if (t_FOVAwareESP)
+            if (Config.Settings.FOVAwareESP)
             {
-                GUILayout.Label($"FOV Threshold: {t_FOVThreshold:F0}°", labelStyle);
-                t_FOVThreshold = GUILayout.HorizontalSlider(t_FOVThreshold, 60f, 180f);
+                GUILayout.Label($"FOV Threshold: {Config.Settings.FOVThreshold:F0}°", labelStyle);
+                Config.Settings.FOVThreshold = GUILayout.HorizontalSlider(Config.Settings.FOVThreshold, 60f, 180f);
             }
             GUILayout.EndVertical();
         }
@@ -298,16 +302,16 @@ namespace SevenDtDAibot.Modules
             GUILayout.Space(SPACING);
             
             // Aimbot Controls
-            t_AAIM = GUILayout.Toggle(t_AAIM, "Activate Aimbot", toggleStyle);
+            Config.Settings.AimbotEnabled = GUILayout.Toggle(Config.Settings.AimbotEnabled, "Activate Aimbot", toggleStyle);
             GUILayout.Space(SPACING);
             
             // Target Selection
             GUILayout.BeginVertical(boxStyle);
             GUILayout.Label("Target Selection:", labelStyle);
-            t_TEnemies = GUILayout.Toggle(t_TEnemies, "Target Enemies", toggleStyle);
-            t_TAnimals = GUILayout.Toggle(t_TAnimals, "Target Animals", toggleStyle);
-            t_TPlayers = GUILayout.Toggle(t_TPlayers, "Target Players", toggleStyle);
-            t_TFOV = GUILayout.Toggle(t_TFOV, "Show FOV Circle", toggleStyle);
+            Config.Settings.TargetEnemies = GUILayout.Toggle(Config.Settings.TargetEnemies, "Target Enemies", toggleStyle);
+            Config.Settings.TargetAnimals = GUILayout.Toggle(Config.Settings.TargetAnimals, "Target Animals", toggleStyle);
+            Config.Settings.TargetPlayers = GUILayout.Toggle(Config.Settings.TargetPlayers, "Target Players", toggleStyle);
+            Config.Settings.ShowFOVCircle = GUILayout.Toggle(Config.Settings.ShowFOVCircle, "Show FOV Circle", toggleStyle);
             GUILayout.EndVertical();
             
             GUILayout.Space(SPACING);
@@ -316,19 +320,19 @@ namespace SevenDtDAibot.Modules
             GUILayout.BeginVertical(boxStyle);
             GUILayout.Label("Aim Settings:", labelStyle);
             
-            GUILayout.Label($"Aim FOV: {t_AimFOV}", labelStyle);
-            t_AimFOV = (int)GUILayout.HorizontalSlider(t_AimFOV, 50f, 400f);
+            GUILayout.Label($"Aim FOV: {Config.Settings.AimFOV}", labelStyle);
+            Config.Settings.AimFOV = (int)GUILayout.HorizontalSlider(Config.Settings.AimFOV, 50f, 400f);
             
-            GUILayout.Label($"Aim Smooth: {t_AimSmooth:F1}", labelStyle);
-            t_AimSmooth = GUILayout.HorizontalSlider(t_AimSmooth, 1f, 20f);
+            GUILayout.Label($"Aim Smooth: {Config.Settings.AimSmooth:F1}", labelStyle);
+            Config.Settings.AimSmooth = GUILayout.HorizontalSlider(Config.Settings.AimSmooth, 1f, 20f);
             
-            t_AimRaw = GUILayout.Toggle(t_AimRaw, "Raw Aiming (Direct Cursor)", toggleStyle);
+            Config.Settings.AimbotRaw = GUILayout.Toggle(Config.Settings.AimbotRaw, "Raw Aiming (Direct Cursor)", toggleStyle);
             GUILayout.EndVertical();
             
             GUILayout.Space(SPACING);
             
             // Debug Options
-            t_DebugOverlay = GUILayout.Toggle(t_DebugOverlay, "Debug Overlay", toggleStyle);
+            Config.Settings.DebugOverlay = GUILayout.Toggle(Config.Settings.DebugOverlay, "Debug Overlay", toggleStyle);
         }
         
         /// <summary>

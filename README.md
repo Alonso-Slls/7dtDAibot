@@ -1,39 +1,51 @@
-# 7dtDAibot - 7 Days to Die Advanced AI Bot v3.0.0
+# 7dtDAibot - 7 Days to Die Advanced AI Bot v3.2.0
 
 ## Overview
 
 This is a clean, modern C# AI bot framework for 7 Days to Die featuring advanced ESP, aimbot, and utility functions with enterprise-grade architecture and performance optimizations. The project demonstrates advanced game AI techniques, performance optimization patterns, and clean software architecture.
 
-**Version 3.0.0**: Complete architectural cleanup with removed legacy code and streamlined functionality.
+**Version 3.2.0**: Complete legacy code cleanup with modern config integration and enhanced performance.
 
 **Note**: This mod works with WeMod loaded as well.
 
-## Architecture v3.0.0
+## Architecture v3.2.0
 
-### Core Components
+### Core Components (13 Modules)
 - **HacksManager**: Central singleton managing all mod systems
-- **EntityTracker**: Generic entity tracking system with optimized scanning
-- **BatchedRenderer**: High-performance rendering with batched draw calls
-- **ESPRenderer**: Specialized ESP rendering with caching
-- **DetailedLogger**: Comprehensive logging system with multiple levels
+- **Config**: Centralized configuration management with JSON persistence
 - **ErrorHandler**: Centralized error handling and reporting
+- **DetailedLogger**: Comprehensive logging system with multiple levels
 
-### Modular Design
-- **Aimbot**: Clean aimbot implementation with target selection
+### Entity System
+- **EntityTracker**: Generic entity tracking with optimized scanning
+- **EntityManager**: Entity lifecycle management
+- **EntitySubscription**: Event-driven entity updates
+- **SpatialGrid**: Spatial indexing for performance
+
+### Rendering System
+- **ESPRenderer**: Specialized ESP rendering with caching
+- **BatchedRenderer**: High-performance batched draw calls
 - **ESP**: Modular ESP system with entity-specific rendering
-- **UI**: Clean user interface with optimized rendering
-- **Hotkeys**: Responsive hotkey system
-- **Config**: Centralized configuration management
+- **ESPPool**: Object pooling for performance optimization
 
-## Features
+### User Interface
+- **UI**: Clean user interface with direct config integration
+- **Hotkeys**: Responsive hotkey system
+
+### Combat System
+- **Aimbot**: Clean aimbot implementation with target selection
+
+## Enhanced Features v3.2.0
 
 ### ESP (Extra Sensory Perception)
 - **Multi-target ESP**: Animals, Zombies/Enemies, Players, Dropped Items, NPCs
-- **Bone ESP**: Advanced skeleton detection for enemies only
+- **Enhanced Bone ESP**: Advanced skeleton detection with adaptive colors
+- **Distance Display**: Shows exact distance in meters for all entities
+- **Extended Range**: 200m render distance for enemies
 - **FOV Culling**: Only renders entities within configurable field of view
-- **Distance Filtering**: Configurable maximum render distance
-- **Color Customization**: Individual color settings per entity type
-- **Performance Optimized**: Batched rendering and entity subscription model
+- **Direct Rendering**: No pooling overhead for better performance
+- **Enhanced Bounds Checking**: 50px margin for better edge detection
+- **Adaptive Quality**: Bone colors change based on distance
 
 ### Aimbot System
 - **Multi-target Support**: Enemies, Players, Animals
@@ -41,364 +53,226 @@ This is a clean, modern C# AI bot framework for 7 Days to Die featuring advanced
 - **FOV Control**: Configurable aimbot field of view
 - **Smooth Aiming**: Adjustable smoothness for natural movement
 - **Visual FOV Indicator**: Optional circle showing aimbot range
+- **Raw Mode**: Direct cursor positioning option
 
-### Utility Functions
-- **Creative Menu**: Press Numpad 1 to enable (works on online servers)
-- **Debug Overlay**: Performance monitoring and error tracking
-- **Safe Unload**: End key for clean DLL removal
+### Performance Optimizations
+- **Direct Rendering**: Eliminated object pooling overhead
+- **Early Distance Culling**: Faster rejection of distant entities
+- **Enhanced Bounds Checking**: More efficient screen coordinate validation
+- **Reduced Bone Threshold**: Lower minimum bones required (6 instead of 8)
+- **Spatial Grid**: Efficient spatial indexing for entity queries
+- **Batched Operations**: Reduced draw call overhead
 
-## Performance Architecture
-
-### Enterprise-Grade Optimizations
-- **Singleton Pattern**: Thread-safe HacksManager with instance-based architecture
-- **Entity Subscription Model**: O(1) entity updates vs O(n) scans
-- **Batched Rendering**: Groups draw calls to minimize GPU state changes
-- **Memory Management**: Object pooling and efficient caching
-- **Thread-Safe Operations**: Concurrent entity tracking with proper synchronization
-- **Resource Cleanup**: IDisposable pattern for proper memory management
-
-### New Architecture Features (v2.1)
-- **Instance-Based Design**: Eliminated static state for better memory management
-- **Modular Components**: Separated concerns with dedicated classes
-  - `HacksManager`: Main singleton coordinator
-  - `EntityTracker<T>`: Generic entity management
-  - `ESPRenderer`: Dedicated rendering system
-  - `Config`: JSON-based settings persistence
-- **Named Constants**: Replaced magic numbers with configurable constants
-- **Backward Compatibility**: Legacy Hacks class maintained during transition
-- **Batched Rendering**: Groups draw calls to minimize GPU state changes
-- **Memory Management**: Object pooling and efficient caching
-- **Thread-Safe Operations**: Concurrent entity tracking with proper synchronization
-- **Resource Cleanup**: IDisposable pattern for proper memory management
-
-### Performance Monitoring
-- Real-time performance statistics
-- Entity count tracking
-- Render time monitoring
-- Memory usage optimization
+### Configuration System
+- **JSON-based Settings**: Persistent configuration storage
+- **Real-time Updates**: Changes apply immediately without restart
+- **Named Constants**: All magic numbers replaced with configurable values
+- **Validation**: Automatic validation and correction of invalid settings
 
 ## Installation
 
 ### Prerequisites
-- 7 Days to Die (latest version recommended)
-- Mono injector (MonoSharpInjector or compatible)
-- Visual Studio (for compilation)
+- 7 Days to Die (latest version)
+- MonoSharpInjector or compatible Mono injector
+- .NET Framework compatibility
 
-### Compilation
-1. Download and open the `.sln` file in Visual Studio
-2. Build in Debug or Release mode (both work)
-3. Locate `Game_7D2D.dll` in the output folder
+### Build Instructions
+1. Clone the repository
+2. Open `7D2D.sln` in Visual Studio or use `dotnet build`
+3. Build in Release configuration
+4. Locate `SevenDtDAibot.dll` in the output folder
 
 ### Injection
 1. Launch 7 Days to Die
 2. Use MonoSharpInjector or compatible Mono injector
 3. Select the game process
-4. Browse to `Game_7D2D.dll`
+4. Browse to `SevenDtDAibot.dll`
 5. Use these injection settings:
-   - **Namespace**: `Game_7D2D`
+   - **Namespace**: `SevenDtDAibot`
    - **Class name**: `Loader`
    - **Method name**: `init`
 6. Press Inject
 
-## Usage
-
-### Controls
-- **Insert Key**: Show/Hide Menu
-- **End Key**: Unload DLL safely
-- **Numpad 1**: Enable Creative Menu
-- **Right Click (ADS)**: Activate aimbot (when enabled)
-
-### Aimbot Usage
-1. Enable aimbot in the menu (select target type)
-2. Equip any rifle, pistol, SMG, or shotgun
-3. Right-click to aim down sights
-4. Move towards target - aimbot will snap to head
+## Controls
 
 ### Menu Navigation
-- Use arrow keys to navigate menu options
-- Enter to toggle features
-- Escape to close menu
+- **Insert**: Toggle mod menu on/off
+- **End**: Safe unload mod DLL
+- **Mouse**: Navigate menu options
 
-## Configuration Options
+### In-Game Shortcuts
+- **Numpad 1**: Enable Creative Menu (works in online servers)
+- **Right Mouse**: Activate aimbot (when enabled)
 
-### ESP Settings
-- **Enemy ESP**: Toggle enemy detection
-- **Player ESP**: Toggle player detection  
+### Menu Options
+
+#### ESP Configuration
+- **Enable ESP**: Master toggle for all ESP features
+- **Enemy ESP**: Toggle zombie/enemy detection
+- **Player ESP**: Toggle player detection
 - **Animal ESP**: Toggle animal detection
 - **Item ESP**: Toggle item detection
 - **NPC ESP**: Toggle NPC detection
-- **Enemy Bones**: Toggle skeleton ESP
-- **FOV Aware ESP**: Only show entities in field of view
+- **Draw Boxes**: Toggle bounding box rendering
+- **Draw Lines**: Toggle corner-to-center lines
+- **Enemy Bones**: Toggle skeleton rendering
+- **Enable FOV-Aware ESP**: Only show entities in view
 
-### Color Configuration
-- **Enemy Color**: RGB color for enemies
-- **Player Color**: RGB color for players
-- **Animal Color**: RGB color for animals
-- **Item Color**: RGB color for items
-- **NPC Color**: RGB color for NPCs
+#### Aimbot Configuration
+- **Activate Aimbot**: Master toggle for aimbot
+- **Auto Aim**: Toggle automatic aiming
+- **Target Selection**: Choose target types (Enemies, Players, Animals)
+- **Show FOV Circle**: Visual aimbot range indicator
+- **Aim FOV**: Adjust aimbot field of view
+- **Aim Smooth**: Adjust aiming smoothness
+- **Raw Mode**: Direct cursor positioning
 
-### Aimbot Settings
-- **Aimbot Enabled**: Master toggle
-- **Aim FOV**: Field of view radius (default: 150)
-- **Aim Smooth**: Movement smoothness (default: 5.0)
-- **Show FOV Circle**: Visual indicator
-- **Target Priority**: Enemy/Player/Animal selection
+#### Visual Settings
+- **FOV Threshold**: Adjust field of view angle (60-180 degrees)
+- **Colors**: Customize colors for each entity type
 
-### Performance Settings
-- **Entity Scan Interval**: Update frequency (default: 5.0s)
-- **Max Render Distance**: Maximum ESP distance (default: 500m)
-- **Debug Overlay**: Performance monitoring display
+## Configuration
 
-## Logging and Debugging
+### Settings File
+Configuration is saved to `SevenDtDAibot_config.json` in the game directory:
 
-### Comprehensive Logging System
+```json
+{
+  "ESPEnabled": true,
+  "EnemyESP": true,
+  "PlayerESP": false,
+  "AnimalESP": false,
+  "ItemESP": true,
+  "NPCESP": false,
+  "ESPBoxes": true,
+  "ESPLines": false,
+  "EnemyBones": true,
+  "FOVAwareESP": true,
+  "FOVThreshold": 120.0,
+  "AimbotEnabled": false,
+  "AutoAim": false,
+  "AimbotRaw": false,
+  "TargetEnemies": false,
+  "TargetAnimals": false,
+  "TargetPlayers": false,
+  "ShowFOVCircle": false,
+  "AimFOV": 150,
+  "AimSmooth": 5.0,
+  "EnemyColor": [1.0, 0.0, 0.0, 1.0],
+  "PlayerColor": [0.0, 1.0, 0.0, 1.0],
+  "AnimalColor": [1.0, 1.0, 0.0, 1.0],
+  "ItemColor": [0.0, 1.0, 1.0, 1.0],
+  "NPCColor": [1.0, 0.0, 1.0, 1.0]
+}
+```
 
-The mod includes a detailed logging system to help with debugging and troubleshooting injection issues.
+## Technical Details
 
-#### Log Files Generated
+### Entity Tracking
+The mod uses a subscription-based entity tracking system that:
+- Monitors entity spawn/despawn events
+- Maintains efficient spatial indexing
+- Provides O(1) lookup for nearby entities
+- Automatically cleans up destroyed entities
 
-1. **`mod_detailed.log`** - Comprehensive logging file
-   - Location: `C:\Users\anoni\OneDrive\Escritorio\SharpMonoInjector.Console\logs\`
-   - Contains: Initialization, component loading, runtime events, errors
-   - Format: `[timestamp] [level] [thread] [context] message`
+### Rendering Pipeline
+- **Direct Rendering**: Bypasses Unity's immediate mode for speed
+- **Batched Rendering**: Groups similar draw calls for performance
+- **Smart Culling**: Only renders visible entities
+- **Distance-based LOD**: Reduces quality for distant objects
 
-2. **`injection_log.txt`** - Injection-specific information
-   - Location: `C:\Users\anoni\OneDrive\Escritorio\SharpMonoInjector.Console\logs\`
-   - Contains: Process information, injection timestamp, system specs
-   - Useful for: Debugging injection failures
+### Memory Management
+- **No Pooling Overhead**: Direct rendering eliminates allocation/deallocation cycles
+- **Better Error Handling**: Prevents memory leaks from exceptions
+- **Optimized Entity Tracking**: Reduced memory footprint with spatial grid
 
-3. **`mod_errors.log`** - Error-specific logging
-   - Location: `C:\Users\anoni\OneDrive\Escritorio\SharpMonoInjector.Console\logs\`
-   - Contains: Errors, warnings, and critical events only
-   - Useful for: Quick error diagnosis
+### Error Handling
+- **Graceful Degradation**: Mod continues working even if individual features fail
+- **Comprehensive Logging**: Detailed error reporting for debugging
+- **Safe Unloading**: Clean removal without game crashes
 
-#### Log Levels
-
-- **DEBUG**: Detailed method tracing and internal operations
-- **INFO**: General information and component initialization
-- **WARNING**: Non-critical issues that should be noted
-- **ERROR**: Errors that may affect functionality
-- **CRITICAL**: Serious errors that may cause crashes
-
-#### Using the Logs
-
-**For Injection Issues:**
-1. Check `injection_log.txt` for injection details
-2. Review `mod_detailed.log` for initialization sequence
-3. Look for CRITICAL or ERROR level entries
-
-**For Runtime Issues:**
-1. Check `mod_errors.log` for recent errors
-2. Use `mod_detailed.log` for detailed context
-3. Look for component initialization failures
-
-**For Performance Issues:**
-1. Enable DEBUG logging for detailed performance data
-2. Monitor entity scanning and rendering performance
-3. Check for memory usage patterns
-
-#### Log Export
-
-The system can export logs to timestamped files for sharing or analysis:
-- Automatic export on critical errors
-- Manual export via DetailedLogger.ExportLogs()
-- Preserves full log history with formatting
-- Location: `C:\Users\anoni\OneDrive\Escritorio\SharpMonoInjector.Console\logs\`
-
-### Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-**Game Crashes After 20-30 Seconds**
-- **Cause**: Previous threading implementation caused memory access violations
-- **Solution**: Current version uses stable architecture with proper memory management
-- **Note**: May experience short lag spikes occasionally for reliability
+**Injection Failed**
+- Ensure correct namespace: `SevenDtDAibot`
+- Verify class name: `Loader`
+- Check method name: `init`
 
-**ESP Not Showing**
-- **Check**: Menu is open (Insert key)
-- **Check**: ESP features are enabled
-- **Check**: Entity scan interval hasn't expired
-- **Check**: Game is fully loaded (in-world)
-
-**Aimbot Not Working**
-- **Check**: Aimbot is enabled in menu
-- **Check**: Correct target type selected
-- **Check**: Weapon is equipped (rifle/pistol/SMG/shotgun)
-- **Check**: Right-clicking to aim down sights
+**ESP Not Working**
+- Press Insert to open menu
+- Enable "ESP" master toggle
+- Enable specific ESP types (Enemy ESP, etc.)
+- Enable "Draw Boxes" for visual rendering
 
 **Performance Issues**
-- **Reduce**: Max render distance
-- **Increase**: Entity scan interval
-- **Disable**: Unused ESP features
-- **Check**: Debug overlay for performance stats
+- Reduce ESP range in settings
+- Disable bone ESP for distant entities
+- Turn off FOV-aware ESP if not needed
 
-### Error Messages
-- **"Menu will load when in a game"**: Wait for game to fully load
-- **"Failed to render ESP"**: Entity may be invalid or destroyed
-- **"Scan failed"**: Game state may be unstable
+**Crashes on Load**
+- Check game version compatibility
+- Ensure all dependencies are loaded
+- Review error logs in `mod_errors.log`
 
-### Compatibility Issues
-- **WeMod**: Fully compatible
-- **Other Mods**: May conflict with entity modification
-- **Anti-Cheat**: Use on servers at your own risk
+### Debug Information
+Enable debug overlay in the menu to see:
+- Entity counts
+- Render statistics
+- Performance metrics
+- Error information
 
-## Known Issues & Limitations
+## Performance Architecture
 
-### Current Limitations
-- **Bone ESP**: Only works for enemies (not players/animals)
-- **Performance**: Short lag spikes during entity scans
-- **Distance**: ESP limited to 500m maximum
-- **Servers**: Creative menu may not work on all servers
+### Rendering Optimizations
+- **Direct GPU Calls**: Bypasses Unity's immediate mode for speed
+- **Early Distance Culling**: Faster rejection of distant entities
+- **Enhanced Bounds Checking**: More efficient screen coordinate validation
+- **Adaptive Quality**: Performance scales with distance
 
-### Known Issues
-- **Entity Desync**: Rare cases of entities not updating immediately
-- **Memory Usage**: Gradual increase over long sessions
-- **FOV Detection**: May miss entities at screen edges
-
-### Planned Improvements
-- Extended bone ESP to all entity types
-- Further performance optimizations
-- Additional configuration options
-- Enhanced error recovery
-
-## Technical Documentation
-
-### Architecture Overview
-The mod uses enterprise-grade architecture with:
-- **Singleton Pattern**: Thread-safe manager instances
-- **Generic Entity Tracking**: Type-safe entity management
-- **Separation of Concerns**: Distinct rendering and logic modules
-- **Event-Driven Updates**: Entity lifecycle events
-- **Resource Management**: Proper disposal and cleanup
-
-### Key Algorithms
-
-**Entity Subscription Model**
-```csharp
-// O(1) entity updates vs O(n) scans
-EntityTracker<T>.Instance.AddEntity(entity);
-EntityTracker<T>.Instance.RemoveEntity(entity);
-```
-
-**Batched Rendering**
-```csharp
-// Groups draw calls by color to minimize state changes
-BatchedRenderer.AddLine(start, end, color, thickness);
-BatchedRenderer.RenderBatches(); // Executes all at once
-```
-
-**FOV Culling**
-```csharp
-// Only renders entities within field of view
-float angle = Vector3.Angle(playerForward, directionToTarget);
-if (angle <= fovThreshold / 2f) RenderEntity();
-```
+### CPU Optimizations
+- **Fewer W2S Calls**: Optimized bone rendering to reduce expensive transformations
+- **Early Rejection**: Faster culling of off-screen entities
+- **Batched Operations**: Reduced draw call overhead
 
 ### Memory Management
-- **Object Pooling**: Reuses GUI content and textures
-- **Caching**: Stores screen positions and distances
-- **Cleanup**: Automatic invalid entity removal
-- **Disposal**: Proper resource cleanup on unload
+- **No Pooling Overhead**: Direct rendering eliminates allocation/deallocation cycles
+- **Better Error Handling**: Prevents memory leaks from exceptions
+- **Optimized Entity Tracking**: Reduced memory footprint with spatial grid
 
-## Version History
+## Changelog
 
-### v2.5 - Custom Log Directory
-- **Custom Log Path**: Logs now saved to `C:\Users\anoni\OneDrive\Escritorio\SharpMonoInjector.Console\logs\`
-- **Centralized Logging**: All log files in injector directory for easy access
-- **Updated Documentation**: README reflects new log locations
+### v3.2.0 (Current)
+- Complete legacy code cleanup
+- Removed all t_ variables from UI
+- Direct config integration throughout
+- Enhanced performance optimizations
+- Better error handling
+- Modern architecture patterns
 
-### v2.4 - Enhanced Detailed Logging System
-- **DetailedLogger**: Comprehensive logging system for injection and runtime debugging
-- **Injection Tracking**: Creates injection_log.txt with detailed injection information
-- **System Information**: Logs game version, Unity version, and system specs
-- **Component Logging**: Tracks initialization of all mod components
-- **Method Tracing**: Optional method entry/exit logging for debugging
-- **Export Functionality**: Export logs to timestamped files for analysis
-- **Thread Safety**: Thread-safe logging with proper synchronization
-- **Multiple Log Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL levels
+### v3.1.0
+- Enhanced ESP rendering with distance display
+- Improved bone ESP with adaptive colors
+- Extended render distance to 200m
+- Removed object pooling for better performance
+- Better error handling and null checks
 
-### v2.3 - SetCursorPos Direct Aiming
-- **Direct Cursor Positioning**: Added SetCursorPos for instant, precise aiming
-- **Raw Aiming Mode**: New t_AimRaw toggle for direct cursor positioning vs mouse_event
-- **Dual Aiming Methods**: Choice between smooth mouse_event and instant SetCursorPos
-- **UI Enhancement**: Added "Raw Aiming (Direct Cursor)" toggle in aimbot menu
-- **Better Precision**: SetCursorPos provides pixel-perfect aiming when enabled
+### v3.0.0
+- Complete architectural cleanup
+- Removed all legacy code
+- Streamlined functionality
+- Improved performance
+- Better error handling
 
-### v2.2 - Enhanced Aimbot Mouse Events
-- **Enhanced Mouse Events**: Added advanced mouse event logic from aimbot_backup
-- **Weapon-Specific Smoothing**: Different aim smoothing for bows, rifles, and other weapons
-- **Movement Clamping**: Added maximum movement limits to prevent excessive mouse movement
-- **Target Tracking**: Added hasTarget state and lastAimTarget tracking
-- **Helper Methods**: Added IsBowWeapon() and IsRangedWeapon() detection methods
-- **Better Error Handling**: Improved exception handling for weapon detection
+## License
 
-### v2.1 - Instance-Based Architecture Refactor
-- **Major Refactor**: Eliminated static state from Hacks class
-- **HacksManager**: New singleton pattern with instance-based architecture
-- **Config Enhancement**: Added comprehensive named constants for all magic numbers
-- **Backward Compatibility**: Legacy Hacks class maintained with deprecation warnings
-- **Code Quality**: Improved separation of concerns and maintainability
-- **Performance**: Better memory management with instance-based design
+This project is for educational purposes only. Use responsibly and at your own risk.
 
-### v2.0 - Enterprise Architecture
-- Implemented singleton pattern managers
-- Added generic EntityTracker<T> system
-- Created dedicated ESPRenderer class
-- Added comprehensive XML documentation
-- Implemented IDisposable pattern
-- Enhanced performance with batched rendering
-- Added entity subscription model
+## Contributing
 
-### v1.5 - Performance Updates
-- Fixed threading memory access violations
-- Improved entity scanning reliability
-- Added performance monitoring
-- Enhanced error handling
-
-### v1.0 - Initial Release
-- Basic ESP functionality
-- Aimbot system
-- Creative menu
-- Menu system
-
-## Support & Contributing
-
-### Reporting Issues
-- Include game version
-- Describe reproduction steps
-- Provide error logs if available
-- Mention other mods installed
-
-### Feature Requests
-- Open an issue with "Feature Request" label
-- Describe desired functionality
-- Explain use case and benefits
-
-### Contributing
-- Follow existing code style
-- Add XML documentation
-- Test thoroughly
-- Submit pull requests
-
-## Legal & Safety
-
-**Disclaimer**: Use this mod at your own risk. The authors are not responsible for:
-- Game bans or account suspensions
-- Server compatibility issues
-- Data loss or corruption
-- Any other consequences
-
-**Recommendation**: Use in single-player or private servers only.
-
-## Screenshots
-
-![Menu Interface](https://user-images.githubusercontent.com/38970826/180594355-e194b91e-ef4b-4c8c-896a-457d524f05fc.png)
-
-![ESP in Action](https://user-images.githubusercontent.com/38970826/180594413-3e7502c3-58b7-4989-a600-cadca337c042.png)
-
----
-
-**Last Updated**: December 2024  
-**Version**: 2.5 - Custom Log Directory  
-**Compatibility**: 7 Days to Die Latest Version
-
+Contributions are welcome! Please ensure:
+- Code follows existing patterns
+- Features include error handling
+- Performance is considered
+- Documentation is updated

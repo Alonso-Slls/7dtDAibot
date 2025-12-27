@@ -183,6 +183,7 @@ namespace SevenDtDAibot.Modules
         // Aimbot Settings
         public bool AimbotEnabled = false;
         public bool AutoAim = false;
+        public bool AimbotRaw = false;
         public bool TargetEnemies = false;
         public bool TargetAnimals = false;
         public bool TargetPlayers = false;

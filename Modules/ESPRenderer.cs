@@ -173,7 +173,17 @@ namespace SevenDtDAibot.Modules
         /// </summary>
         public void RenderAllESP()
         {
-            if (_disposed || _mainCamera == null) return;
+            if (_disposed || _mainCamera == null) 
+            {
+                DetailedLogger.Log(DetailedLogger.LogLevel.DEBUG, "ESPRenderer", "RenderAllESP skipped: disposed=" + _disposed + ", camera=" + (_mainCamera != null));
+                return;
+            }
+            
+            // Check if we're in a game
+            if (GameManager.Instance == null || !GameManager.Instance.gameStateManager.IsGameStarted())
+            {
+                return;
+            }
             
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
@@ -181,6 +191,13 @@ namespace SevenDtDAibot.Modules
             {
                 // Update camera reference if needed
                 UpdateCameraReference();
+                
+                // Re-check camera after update
+                if (_mainCamera == null)
+                {
+                    DetailedLogger.Log(DetailedLogger.LogLevel.DEBUG, "ESPRenderer", "Camera still null after update");
+                    return;
+                }
                 
                 // Update caches periodically
                 UpdateCaches();
@@ -216,9 +233,14 @@ namespace SevenDtDAibot.Modules
         /// </summary>
         private void RenderEnemyESP()
         {
-            if (!Config.Settings.EnemyESP) return;
+            if (!Config.Settings.EnemyESP) 
+            {
+                DetailedLogger.Log(DetailedLogger.LogLevel.DEBUG, "ESPRenderer", "EnemyESP disabled");
+                return;
+            }
             
             var enemies = EntityTracker<EntityEnemy>.Instance.GetEntitiesInRange(_mainCamera.transform.position, _maxRenderDistance);
+            DetailedLogger.Log(DetailedLogger.LogLevel.DEBUG, "ESPRenderer", $"Found {enemies.Length} enemies in range");
             
             foreach (var enemy in enemies)
             {

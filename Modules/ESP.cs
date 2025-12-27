@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,15 +50,18 @@ namespace SevenDtDAibot.Modules
         }
         public static void esp_drawBox(EntityEnemy entity, Color color)
         {
-            Vector3 entity_head = entity.transform.position;
-            Vector3 entity_feet = new Vector3(entity_head.x, entity_head.y + entity.height, entity_head.z);
-
             if (HacksManager.Instance == null || HacksManager.Instance.MainCamera == null) return;
-            const float maxDist = 100f;
+
+            // Performance optimization: early distance culling
+            const float maxDist = 100f; 
             var localPlayer = GameManager.Instance.World.GetPrimaryPlayer();
             if (localPlayer == null) return;
+
             float distSqr = (entity.transform.position - localPlayer.transform.position).sqrMagnitude;
             if (distSqr > maxDist * maxDist) return;
+
+            Vector3 entity_head = entity.transform.position;
+            Vector3 entity_feet = new Vector3(entity_head.x, entity_head.y + entity.height, entity_head.z);
 
             // FOV-Aware ESP: Check if entity is within player's field of view
             if (!IsEntityInFOV(entity_head))
@@ -71,21 +74,22 @@ namespace SevenDtDAibot.Modules
             float Distance = Mathf.Sqrt(distSqr);
             Vector3 w2s_test = HacksManager.Instance.WorldToScreenPoint(entity.emodel.GetHeadTransform().position);
 
-            if (w2s_head.z > 0f && w2s_head.x > 0 && w2s_head.x < (float)Screen.width && w2s_head.y > 0 && Distance <= maxDist)
+            // Enhanced screen bounds checking
+            if (w2s_head.z > 0f && w2s_head.x > -50 && w2s_head.x < (float)Screen.width + 50 &&
+                w2s_head.y > -50 && w2s_head.y < (float)Screen.height + 50 && Distance <= maxDist)
             {
-                if (UI.t_ESPBoxes)
+                if (Config.Settings.ESPBoxes)
                 {
-                    DrawESPBox(w2s_feet, w2s_head, color, entity.EntityName);
+                    DrawESPBox(w2s_feet, w2s_head, color, $"{entity.EntityName} [{Mathf.Round(Distance)}m]");
                     DrawESPBox(w2s_test, new Vector3(w2s_test.x - 1f, w2s_test.y - 1f, w2s_test.z), Color.green, "");
                 }
 
-
-                if (UI.t_ESPLines)
+                if (Config.Settings.ESPLines)
                 {
                     BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                 }
 
-                if (UI.t_EnemyBones)
+                if (Config.Settings.EnemyBones)
                 {
                     // Only compute bones if head is on-screen (saves many W2S calls when off-screen)
                     if (w2s_head.z > 0f && w2s_head.x > 0 && w2s_head.x < (float)Screen.width && w2s_head.y > 0)
@@ -94,7 +98,7 @@ namespace SevenDtDAibot.Modules
                         {
                             var smr = entity.GetComponentInChildren<SkinnedMeshRenderer>();
                             if (smr == null || smr.bones == null) return;
-                            
+
                             Transform[] entityBones = smr.bones;
                             int canBone = 0;
 
@@ -110,57 +114,60 @@ namespace SevenDtDAibot.Modules
                                 if (entityBones[j] == null) continue;
                                 var bonePos = entityBones[j].position;
                                 var boneName = entityBones[j].name.ToLower();
-                                
-                                // Use more flexible bone name matching
+
+                                // Enhanced bone name matching with more patterns
                                 if (boneName.Contains("head")) { eb_head = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                                 else if (boneName.Contains("neck")) { eb_neck = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("spine") || boneName.Contains("chest")) { eb_spine = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("leftshoulder") || boneName.Contains("l_shoulder")) { eb_leftshoulder = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("leftarm") || boneName.Contains("l_arm")) { eb_leftarm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("leftforearm") || boneName.Contains("l_forearm")) { eb_leftforearm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("spine") || boneName.Contains("chest") || boneName.Contains("torso")) { eb_spine = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("leftshoulder") || boneName.Contains("l_shoulder") || boneName.Contains("l_clavicle")) { eb_leftshoulder = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("leftarm") || boneName.Contains("l_arm") || boneName.Contains("l_upperarm")) { eb_leftarm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("leftforearm") || boneName.Contains("l_forearm") || boneName.Contains("l_lowerarm")) { eb_leftforearm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                                 else if (boneName.Contains("lefthand") || boneName.Contains("l_hand")) { eb_lefthand = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("rightshoulder") || boneName.Contains("r_shoulder")) { eb_rightshoulder = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("rightarm") || boneName.Contains("r_arm")) { eb_rightarm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("rightforearm") || boneName.Contains("r_forearm")) { eb_rightforearm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("rightshoulder") || boneName.Contains("r_shoulder") || boneName.Contains("r_clavicle")) { eb_rightshoulder = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("rightarm") || boneName.Contains("r_arm") || boneName.Contains("r_upperarm")) { eb_rightarm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("rightforearm") || boneName.Contains("r_forearm") || boneName.Contains("r_lowerarm")) { eb_rightforearm = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                                 else if (boneName.Contains("righthand") || boneName.Contains("r_hand")) { eb_righthand = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                                 else if (boneName.Contains("hips") || boneName.Contains("pelvis")) { eb_hips = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("leftupleg") || boneName.Contains("l_thigh")) { eb_leftupleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("leftleg") || boneName.Contains("l_leg")) { eb_leftleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("leftupleg") || boneName.Contains("l_thigh") || boneName.Contains("l_upperleg")) { eb_leftupleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("leftleg") || boneName.Contains("l_leg") || boneName.Contains("l_lowerleg")) { eb_leftleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                                 else if (boneName.Contains("leftfoot") || boneName.Contains("l_foot")) { eb_leftfoot = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("rightupleg") || boneName.Contains("r_thigh")) { eb_rightupleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
-                                else if (boneName.Contains("rightleg") || boneName.Contains("r_leg")) { eb_rightleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("rightupleg") || boneName.Contains("r_thigh") || boneName.Contains("r_upperleg")) { eb_rightupleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
+                                else if (boneName.Contains("rightleg") || boneName.Contains("r_leg") || boneName.Contains("r_lowerleg")) { eb_rightleg = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                                 else if (boneName.Contains("rightfoot") || boneName.Contains("r_foot")) { eb_rightfoot = HacksManager.Instance.WorldToScreenPoint(bonePos); canBone++; }
                             }
 
-                            // Draw skeleton with minimum required bones (more flexible threshold)
-                            if (canBone >= 8) // Reduced from 18 to 8 for better compatibility
+                            // Enhanced skeleton drawing with adaptive quality based on distance
+                            if (canBone >= 6) // Further reduced threshold for better compatibility
                             {
+                                // Use different colors based on distance for better visibility
+                                Color boneColor = Distance > 100f ? Color.yellow : Color.green;
+
                                 // Spine
-                                if (eb_head != Vector3.zero && eb_neck != Vector3.zero) DrawESPLine(eb_head, eb_neck, Color.green);
-                                if (eb_neck != Vector3.zero && eb_spine != Vector3.zero) DrawESPLine(eb_neck, eb_spine, Color.green);
-                                if (eb_spine != Vector3.zero && eb_hips != Vector3.zero) DrawESPLine(eb_spine, eb_hips, Color.green);
+                                if (eb_head != Vector3.zero && eb_neck != Vector3.zero) DrawESPLine(eb_head, eb_neck, boneColor);
+                                if (eb_neck != Vector3.zero && eb_spine != Vector3.zero) DrawESPLine(eb_neck, eb_spine, boneColor);
+                                if (eb_spine != Vector3.zero && eb_hips != Vector3.zero) DrawESPLine(eb_spine, eb_hips, boneColor);
 
                                 // Left arm
-                                if (eb_neck != Vector3.zero && eb_leftshoulder != Vector3.zero) DrawESPLine(eb_neck, eb_leftshoulder, Color.green);
-                                if (eb_leftshoulder != Vector3.zero && eb_leftarm != Vector3.zero) DrawESPLine(eb_leftshoulder, eb_leftarm, Color.green);
-                                if (eb_leftarm != Vector3.zero && eb_leftforearm != Vector3.zero) DrawESPLine(eb_leftarm, eb_leftforearm, Color.green);
-                                if (eb_leftforearm != Vector3.zero && eb_lefthand != Vector3.zero) DrawESPLine(eb_leftforearm, eb_lefthand, Color.green);
+                                if (eb_neck != Vector3.zero && eb_leftshoulder != Vector3.zero) DrawESPLine(eb_neck, eb_leftshoulder, boneColor);
+                                if (eb_leftshoulder != Vector3.zero && eb_leftarm != Vector3.zero) DrawESPLine(eb_leftshoulder, eb_leftarm, boneColor);
+                                if (eb_leftarm != Vector3.zero && eb_leftforearm != Vector3.zero) DrawESPLine(eb_leftarm, eb_leftforearm, boneColor);
+                                if (eb_leftforearm != Vector3.zero && eb_lefthand != Vector3.zero) DrawESPLine(eb_leftforearm, eb_lefthand, boneColor);
 
                                 // Right arm
-                                if (eb_neck != Vector3.zero && eb_rightshoulder != Vector3.zero) DrawESPLine(eb_neck, eb_rightshoulder, Color.green);
-                                if (eb_rightshoulder != Vector3.zero && eb_rightarm != Vector3.zero) DrawESPLine(eb_rightshoulder, eb_rightarm, Color.green);
-                                if (eb_rightarm != Vector3.zero && eb_rightforearm != Vector3.zero) DrawESPLine(eb_rightarm, eb_rightforearm, Color.green);
-                                if (eb_rightforearm != Vector3.zero && eb_righthand != Vector3.zero) DrawESPLine(eb_rightforearm, eb_righthand, Color.green);
+                                if (eb_neck != Vector3.zero && eb_rightshoulder != Vector3.zero) DrawESPLine(eb_neck, eb_rightshoulder, boneColor);
+                                if (eb_rightshoulder != Vector3.zero && eb_rightarm != Vector3.zero) DrawESPLine(eb_rightshoulder, eb_rightarm, boneColor);
+                                if (eb_rightarm != Vector3.zero && eb_rightforearm != Vector3.zero) DrawESPLine(eb_rightarm, eb_rightforearm, boneColor);
+                                if (eb_rightforearm != Vector3.zero && eb_righthand != Vector3.zero) DrawESPLine(eb_rightforearm, eb_righthand, boneColor);
 
                                 // Left leg
-                                if (eb_hips != Vector3.zero && eb_leftupleg != Vector3.zero) DrawESPLine(eb_hips, eb_leftupleg, Color.green);
-                                if (eb_leftupleg != Vector3.zero && eb_leftleg != Vector3.zero) DrawESPLine(eb_leftupleg, eb_leftleg, Color.green);
-                                if (eb_leftleg != Vector3.zero && eb_leftfoot != Vector3.zero) DrawESPLine(eb_leftleg, eb_leftfoot, Color.green);
+                                if (eb_hips != Vector3.zero && eb_leftupleg != Vector3.zero) DrawESPLine(eb_hips, eb_leftupleg, boneColor);
+                                if (eb_leftupleg != Vector3.zero && eb_leftleg != Vector3.zero) DrawESPLine(eb_leftupleg, eb_leftleg, boneColor);
+                                if (eb_leftleg != Vector3.zero && eb_leftfoot != Vector3.zero) DrawESPLine(eb_leftleg, eb_leftfoot, boneColor);
 
                                 // Right leg
-                                if (eb_hips != Vector3.zero && eb_rightupleg != Vector3.zero) DrawESPLine(eb_hips, eb_rightupleg, Color.green);
-                                if (eb_rightupleg != Vector3.zero && eb_rightleg != Vector3.zero) DrawESPLine(eb_rightupleg, eb_rightleg, Color.green);
-                                if (eb_rightleg != Vector3.zero && eb_rightfoot != Vector3.zero) DrawESPLine(eb_rightleg, eb_rightfoot, Color.green);
+                                if (eb_hips != Vector3.zero && eb_rightupleg != Vector3.zero) DrawESPLine(eb_hips, eb_rightupleg, boneColor);
+                                if (eb_rightupleg != Vector3.zero && eb_rightleg != Vector3.zero) DrawESPLine(eb_rightupleg, eb_rightleg, boneColor);
+                                if (eb_rightleg != Vector3.zero && eb_rightfoot != Vector3.zero) DrawESPLine(eb_rightleg, eb_rightfoot, boneColor);
                             }
                         }
                         catch (System.Exception)
@@ -240,12 +247,12 @@ namespace SevenDtDAibot.Modules
 
             if (w2s_head.z > 0f && w2s_head.x > 0 && w2s_head.x < (float)Screen.width && w2s_head.y > 0)
             {
-                if (UI.t_ESPBoxes)
+                if (Config.Settings.ESPBoxes)
                 {
                     DrawESPBox(w2s_feet, w2s_head, color, entity.EntityName);
                 }
 
-                if (UI.t_ESPLines)
+                if (Config.Settings.ESPLines)
                 {
                     BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                 }
@@ -276,7 +283,7 @@ namespace SevenDtDAibot.Modules
 
             if (w2s_head.z > 0f && w2s_head.x > 0 && w2s_head.x < (float)Screen.width && w2s_head.y > 0)
             {
-                if (UI.t_ESPBoxes)
+                if (Config.Settings.ESPBoxes)
                 {
                     if (entity != localPlayer)
                     {
@@ -293,7 +300,7 @@ namespace SevenDtDAibot.Modules
                     DrawESPBox(w2s_test, new Vector3(w2s_test.x - 1f, w2s_test.y - 1f, w2s_test.z), Color.green, "");
                 }
 
-                if (UI.t_ESPLines)
+                if (Config.Settings.ESPLines)
                 {
                     if (entity != localPlayer)
                     {
@@ -328,12 +335,12 @@ namespace SevenDtDAibot.Modules
 
             if (w2s_head.z > 0f && w2s_head.x > 0 && w2s_head.x < (float)Screen.width && w2s_head.y > 0 && Distance <= maxDist)
             {
-                if (UI.t_ESPBoxes)
+                if (Config.Settings.ESPBoxes)
                 {
                     DrawESPBox(w2s_feet, w2s_head, color, entity.EntityName.Replace("animal", ""));
                     DrawESPBox(w2s_test, new Vector3(w2s_test.x - 1f, w2s_test.y - 1f, w2s_test.z), Color.green, "");
                 }
-                if (UI.t_ESPLines)
+                if (Config.Settings.ESPLines)
                 {
                     BatchedRenderer.AddLine(new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y), new Vector2((float)Screen.width / 2, (float)Screen.height - 100), color, 1f);
                 }
@@ -342,67 +349,38 @@ namespace SevenDtDAibot.Modules
 
 
         /// <summary>
-        /// Draw an ESP line using object pooling for performance.
+        /// Draw an ESP line using direct rendering for better performance.
         /// </summary>
         private static void DrawESPLine(Vector3 start, Vector3 end, Color color)
         {
-            var lineData = ESPPool.GetLine();
-            lineData.Set(
+            BatchedRenderer.AddLine(
                 new Vector2(start.x, Screen.height - start.y),
                 new Vector2(end.x, Screen.height - end.y),
                 color,
                 1f
             );
-            
-            // Render the line using the pooled data
-            BatchedRenderer.AddLine(lineData.start, lineData.end, lineData.color, lineData.thickness);
-            
-            // Return to pool for reuse
-            ESPPool.ReturnLine(lineData);
-            ESPPool.IncrementLineCount();
         }
         
         /// <summary>
-        /// Draw an ESP box using object pooling for performance.
+        /// Draw an ESP box using direct rendering for better performance.
         /// </summary>
         private static void DrawESPBox(Vector3 objfootPos, Vector3 objheadPos, Color objColor, String name)
         {
-            var boxData = ESPPool.GetBox();
-            
             //Draw Basic ESP Method from Vector3 W2S input
             float height = objheadPos.y - objfootPos.y;
             float widthOffset = 2f;
             float width = height / widthOffset;
 
-            boxData.Set(
-                objfootPos.x - (width / 2),
-                (float)Screen.height - objfootPos.y - height,
-                width,
-                height,
-                objColor,
-                2f,
-                name
-            );
+            float x = objfootPos.x - (width / 2);
+            float y = (float)Screen.height - objfootPos.y - height;
 
-            // Render the box using the pooled data
-            BatchedRenderer.AddBox(boxData.x, boxData.y, boxData.width, boxData.height, boxData.color, boxData.thickness);
+            // Render directly without pooling for better performance
+            BatchedRenderer.AddBox(x, y, width, height, objColor, 2f);
             
-            if (!string.IsNullOrEmpty(boxData.text))
+            if (!string.IsNullOrEmpty(name))
             {
-                var textData = ESPPool.GetText();
-                textData.Set(
-                    new Vector2(boxData.x, boxData.y),
-                    boxData.text,
-                    Color.white
-                );
-                BatchedRenderer.AddText(textData.position, textData.text, Color.white);
-                ESPPool.ReturnText(textData);
-                ESPPool.IncrementTextCount();
+                BatchedRenderer.AddText(new Vector2(x, y), name, Color.white);
             }
-            
-            // Return to pool for reuse
-            ESPPool.ReturnBox(boxData);
-            ESPPool.IncrementBoxCount();
         }
         
         /// <summary>
