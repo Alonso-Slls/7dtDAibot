@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
     /// <summary>
     /// Spatial partitioning system using grid-based hash map for efficient entity queries.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Reflection;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
 
     class Aimbot

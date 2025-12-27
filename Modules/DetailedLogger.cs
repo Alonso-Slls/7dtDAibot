@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
     /// <summary>
     /// Enhanced logging system for detailed injection and runtime debugging.

@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
     /// <summary>
     /// Main mod manager that replaces the monolithic static Hacks class.

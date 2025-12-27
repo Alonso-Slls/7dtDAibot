@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using Game_7D2D.Modules;
+using SevenDtDAibot.Modules;
 
-namespace Game_7D2D
+namespace SevenDtDAibot
 {
     public class Loader
     {

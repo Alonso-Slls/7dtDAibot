@@ -1,8 +1,8 @@
-# 7 Days to Die - Enhanced ESP & Aimbot Framework
+# 7dtDAibot - 7 Days to Die Advanced AI Bot
 
 ## Overview
 
-This is a comprehensive C# framework for 7 Days to Die featuring advanced ESP, aimbot, and utility functions with enterprise-grade architecture and performance optimizations. The project demonstrates advanced game modding techniques, performance optimization patterns, and clean software architecture.
+This is a comprehensive C# AI bot framework for 7 Days to Die featuring advanced ESP, Moss, aimbot, and utility functions with enterprise-grade architecture and performance optimizations. The project demonstrates advanced game AI techniques, performance optimization patterns, and clean software architecture.
 
 **Note:** This mod works with WeMod loaded as well.
 

@@ -7,8 +7,8 @@
     <ProjectGuid>{D3954F4B-CD1C-4F54-B23D-B700AD2D1348}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Game_7D2D</RootNamespace>
-    <AssemblyName>Game_7D2D</AssemblyName>
+    <RootNamespace>SevenDtDAibot</RootNamespace>
+    <AssemblyName>7dtDAibot</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

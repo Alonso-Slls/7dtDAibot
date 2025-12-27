@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
     /// <summary>
     /// Object pooling system for ESP rendering elements to reduce garbage collection overhead.

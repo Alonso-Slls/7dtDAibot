@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
     /// <summary>
     /// Dedicated ESP renderer that separates UI concerns from game logic.

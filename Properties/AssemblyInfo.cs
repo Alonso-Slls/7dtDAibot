@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("7D2D Enhanced ESP Framework")]
-[assembly: AssemblyDescription("Advanced ESP and Aimbot framework for 7 Days to Die with enterprise-grade architecture")]
+[assembly: AssemblyTitle("7dtDAibot")]
+[assembly: AssemblyDescription("7 Days to Die Advanced AI Bot Framework")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Independent Game Modding Framework")]
-[assembly: AssemblyProduct("7D2D Enhanced ESP Framework")]
-[assembly: AssemblyCopyright("Copyright © 2024")]
+[assembly: AssemblyCompany("Alonso-Slls")]
+[assembly: AssemblyProduct("7dtDAibot")]
+[assembly: AssemblyCopyright("Copyright © Alonso-Slls 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace SevenDtDAibot.Modules
 {
     /// <summary>
     /// Modernized UI system using Unity's IMGUI with improved styling and layout.
@@ -283,7 +283,7 @@ namespace Game_7D2D.Modules
             
             if (t_FOVAwareESP)
             {
-                GUILayout.Label($"FOV Threshold: {t_FOVThreshold:F0}°", labelStyle);
+                GUILayout.Label($"FOV Threshold: {t_FOVThreshold:F0}�", labelStyle);
                 t_FOVThreshold = GUILayout.HorizontalSlider(t_FOVThreshold, 60f, 180f);
             }
             GUILayout.EndVertical();
