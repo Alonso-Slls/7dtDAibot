@@ -116,9 +116,6 @@ namespace SevenDtDAibot.Modules
             {
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
-                
-                // Initialize legacy Hacks for backward compatibility
-                Hacks.Initialize();
             }
             else if (_instance != this)
             {
@@ -234,9 +231,6 @@ namespace SevenDtDAibot.Modules
                 // Initialize renderers
                 InitializeRenderers();
                 
-                // Start main update coroutine
-                // StartCoroutine(UpdateCoroutine()); // Commented out - method doesn't exist
-                
                 _isLoaded = true;
                 DetailedLogger.Log(DetailedLogger.LogLevel.INFO, "HacksManager", "Mod initialization completed successfully");
                 
@@ -269,8 +263,6 @@ namespace SevenDtDAibot.Modules
         /// </summary>
         private void InitializeRenderers()
         {
-            // Initialize ESP renderer
-            // ESPRenderer.Instance.Initialize(); // Commented out - method doesn't exist
             DetailedLogger.LogComponentInit("ESPRenderer", true);
             
             // Initialize batched renderer
