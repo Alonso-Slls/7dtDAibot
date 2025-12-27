@@ -296,12 +296,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Loader.cs" />
-    <Compile Include="Hacks.cs" />
     <Compile Include="Modules\Aimbot.cs" />
     <Compile Include="Modules\BatchedRenderer.cs" />
     <Compile Include="Modules\Config.cs" />
     <Compile Include="Modules\DetailedLogger.cs" />
-    <Compile Include="Modules\Hacks_Legacy.cs" />
     <Compile Include="Modules\ESPPool.cs" />
     <Compile Include="Modules\ESPRenderer.cs" />
     <Compile Include="Modules\EntityManager.cs" />

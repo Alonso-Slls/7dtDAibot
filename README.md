@@ -1,10 +1,29 @@
-# 7dtDAibot - 7 Days to Die Advanced AI Bot
+# 7dtDAibot - 7 Days to Die Advanced AI Bot v3.0.0
 
 ## Overview
 
-This is a comprehensive C# AI bot framework for 7 Days to Die featuring advanced ESP, Moss, aimbot, and utility functions with enterprise-grade architecture and performance optimizations. The project demonstrates advanced game AI techniques, performance optimization patterns, and clean software architecture.
+This is a clean, modern C# AI bot framework for 7 Days to Die featuring advanced ESP, aimbot, and utility functions with enterprise-grade architecture and performance optimizations. The project demonstrates advanced game AI techniques, performance optimization patterns, and clean software architecture.
 
-**Note:** This mod works with WeMod loaded as well.
+**Version 3.0.0**: Complete architectural cleanup with removed legacy code and streamlined functionality.
+
+**Note**: This mod works with WeMod loaded as well.
+
+## Architecture v3.0.0
+
+### Core Components
+- **HacksManager**: Central singleton managing all mod systems
+- **EntityTracker**: Generic entity tracking system with optimized scanning
+- **BatchedRenderer**: High-performance rendering with batched draw calls
+- **ESPRenderer**: Specialized ESP rendering with caching
+- **DetailedLogger**: Comprehensive logging system with multiple levels
+- **ErrorHandler**: Centralized error handling and reporting
+
+### Modular Design
+- **Aimbot**: Clean aimbot implementation with target selection
+- **ESP**: Modular ESP system with entity-specific rendering
+- **UI**: Clean user interface with optimized rendering
+- **Hotkeys**: Responsive hotkey system
+- **Config**: Centralized configuration management
 
 ## Features
 

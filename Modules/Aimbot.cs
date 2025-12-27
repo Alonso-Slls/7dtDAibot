@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -20,31 +20,16 @@ namespace SevenDtDAibot.Modules
         private static extern bool SetCursorPos(int x, int y);
 
         public static bool hasTarget = false;
-        private static Camera Camera;
+        // private static Camera Camera; // Unused - remove
         private static Vector2 lastAimTarget = Vector2.zero;
         private static Dictionary<int, Transform> headCache = new Dictionary<int, Transform>();
         private static Dictionary<int, Transform> torsoCache = new Dictionary<int, Transform>();
-        private static float lastFireTime = 0f;
-        private static float fireCooldown = Config.FIRE_COOLDOWN; // seconds between auto-fires
-        private struct PosSample { public Vector3 pos; public float time; }
-        private static Dictionary<int, PosSample> posSamples = new Dictionary<int, PosSample>();
-
-        // Per-weapon projectile speed detection (cached to avoid heavy reflection calls)
-        private static float cachedWeaponSpeed = 0f;
-        private static int cachedWeaponId = 0;
-        private static float lastWeaponCheckTime = 0f;
-        private const float weaponCheckInterval = Config.WEAPON_CHECK_INTERVAL; // check at most 4x/sec
-        private static string cachedWeaponInfo = ""; // e.g. "CompoundBow:180"
-        private static string lastException = ""; // last exception text (first line for overlay)
+        // Unused fields removed for cleaner code
 
         private struct Candidate
         {
-            public Vector3 worldPos;
-            public Vector3 screenPos;
-            public float screenDist;
             public Entity entity;
             public float distance;
-            public Vector3 velocity;
         }
         
                 
@@ -57,7 +42,7 @@ namespace SevenDtDAibot.Modules
 
             if (UI.t_TAnimals)
             {
-                foreach (EntityAnimal animal in Hacks.eAnimal)
+                foreach (EntityAnimal animal in EntityTracker<EntityAnimal>.Instance.GetAllEntities())
                 {
                     if (animal && animal.IsAlive())
                     {
@@ -95,7 +80,7 @@ namespace SevenDtDAibot.Modules
 
             if (UI.t_TPlayers)
             {
-                foreach (EntityPlayer player in Hacks.ePlayers)
+                foreach (EntityPlayer player in EntityTracker<EntityPlayer>.Instance.GetAllEntities())
                 {
                     if (player && player.IsAlive())
                     {
@@ -132,7 +117,7 @@ namespace SevenDtDAibot.Modules
             }
 
             if (UI.t_TEnemies) {
-                foreach (EntityEnemy enemy in Hacks.eEnemy)
+                foreach (EntityEnemy enemy in EntityTracker<EntityEnemy>.Instance.GetAllEntities())
                 {
                     if (enemy && enemy.IsAlive())
                     {

@@ -353,9 +353,9 @@ namespace SevenDtDAibot.Modules
             try
             {
                 // Use legacy Hacks collections for now
-                if (Hacks.eAnimal != null) count += Hacks.eAnimal.Count;
-                if (Hacks.ePlayers != null) count += Hacks.ePlayers.Count;
-                if (Hacks.eEnemy != null) count += Hacks.eEnemy.Count;
+                count += EntityTracker<EntityAnimal>.Instance.GetAllEntities().Length;
+                count += EntityTracker<EntityPlayer>.Instance.GetAllEntities().Length;
+                count += EntityTracker<EntityEnemy>.Instance.GetAllEntities().Length;
             }
             catch
             {
