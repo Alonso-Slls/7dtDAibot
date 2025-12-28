@@ -7,10 +7,19 @@ using UnityEngine;
 
 namespace Game_7D2D.Modules
 {
+    /// <summary>
+    /// ESP (Extra Sensory Perception) rendering module for 7 Days to Die.
+    /// Provides visual overlays for entities including boxes and bone structures.
+    /// </summary>
     class ESP
     {
         private static Vector3 eb_head, eb_neck, eb_spine, eb_leftshoulder, eb_leftarm, eb_leftforearm, eb_lefthand, eb_rightshoulder, eb_rightarm, eb_rightforearm;
         private static Vector3 eb_righthand, eb_hips, eb_leftupleg, eb_leftleg, eb_leftfoot, eb_rightupleg, eb_rightleg, eb_rightfoot;
+        /// <summary>
+        /// Draws ESP box and bone visualization for an enemy entity.
+        /// </summary>
+        /// <param name="entity">The enemy entity to visualize</param>
+        /// <param name="color">Color for the ESP box</param>
         public static void esp_drawBox(EntityEnemy entity, Color color)
         {
             Vector3 entity_head = entity.transform.position;

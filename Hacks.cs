@@ -7,6 +7,10 @@ using System.Linq;
 
 namespace Game_7D2D
 {
+    /// <summary>
+    /// Main controller class for the ESP system.
+    /// Handles entity scanning, caching, and rendering coordination.
+    /// </summary>
     class Hacks : MonoBehaviour
     {
         public static Camera MainCamera = null;
@@ -30,12 +34,18 @@ namespace Game_7D2D
 
         public static bool isLoaded = GameManager.Instance.gameStateManager.IsGameStarted();
 
+        /// <summary>
+        /// Initializes the ESP system and loads configuration.
+        /// </summary>
         public void Start()
         {
             // Load configuration
             ESPConfig.LoadConfig();
         }
 
+        /// <summary>
+        /// Main update loop. Handles input, entity scanning, and state management.
+        /// </summary>
         public void Update()
         {
             if (isLoaded)
@@ -60,6 +70,9 @@ namespace Game_7D2D
             checkState();
         }
 
+        /// <summary>
+        /// GUI rendering loop. Renders menu and ESP visualizations.
+        /// </summary>
         public void OnGUI()
         {
             if (!isLoaded)
@@ -104,6 +117,10 @@ namespace Game_7D2D
             Hacks.eLocalPlayer = UnityEngine.GameObject.FindObjectOfType<EntityPlayerLocal>();
         }
         
+        /// <summary>
+        /// Scans for entities and caches them with distance filtering.
+        /// . Called at fixed.
+        /// . </summary>
         private static void ScanEntities()
         {
             cachedEntities.Clear();
@@ -114,45 +131,16 @@ namespace Game_7D2D
             
             try
             {
-                var enemies = UnityEngine.GameObject.FindObjectsOfType<EntityEnemy>();
-                if (enemies != null)
-                {
-                    foreach (var enemy in enemies)
-                    {
-                        if (enemy == null || !enemy.IsAlive()) continue;
-                        
-                        float distance = Vector3.Distance(cameraPos, enemy.transform.position);
-                        
-                        // Distance culling
-                        if (distance > ESPConfig.MaxESPDistance) continue;
-                        
-                        cachedEntities.Add(new EntityData
-                        {
-                            Entity = enemy,
-                            Color = ESPConfig.EnemyColor,
-                            Label = "Enemy",
-                            Position = enemy.transform.position,
-                            Distance = distance
-                        });
-                    }
-                }
+                // Use dedicated EntityScanner module
+                cachedEntities = EntityScanner.ScanEnemies(cameraPos, ESPConfig.MaxESPDistance);
             }
             catch (System.Exception ex)
             {
-                // Log error if needed
+                Debug.LogError($"[Hacks] Error in ScanEntities: {ex.Message}");
             }
         }
         
-        // Helper class to cache entity data
-        private class EntityData
-        {
-            public EntityEnemy Entity;
-            public Color Color;
-            public string Label;
-            public Vector3 Position;
-            public float Distance;
         }
-
         
     }
 
