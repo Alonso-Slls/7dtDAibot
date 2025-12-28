@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("7dtDAibot")]
-[assembly: AssemblyDescription("7 Days to Die Advanced AI Bot Framework")]
+[assembly: AssemblyTitle("\x42\x61\x73\x65\x4c\x6f\x61\x64\x65\x72")]
+[assembly: AssemblyDescription("\x43\x72\x65\x61\x74\x65\x64\x20\x66\x72\x6f\x6d\x20\x47\x68\x30\x73\x74\x20\x42\x61\x73\x65\x4c\x6f\x61\x64\x65\x72")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Alonso-Slls")]
-[assembly: AssemblyProduct("7dtDAibot")]
-[assembly: AssemblyCopyright("Copyright © Alonso-Slls 2024")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("\x42\x61\x73\x65\x4c\x6f\x61\x64\x65\x72")]
+[assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.0.0.0")]
-[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

@@ -26,7 +26,6 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-!/logs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -339,24 +338,3 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-
-# Game modding specific files
-# Log files from the mod
-mod_*.log
-injection_*.log
-config.json
-settings.json
-user_*.json
-
-# Injection tools and temporary files
-SharpMonoInjector.Console/
-injection_log.txt
-
-# Backup files from development
-*_backup.*
-*.bak
-*.backup
-
-# Mono specific
-*.mono.dll
-*.mono.exe
