@@ -12,6 +12,13 @@ A comprehensive ESP (Extra Sensory Perception) and debugging framework for 7 Day
 - **Dynamic box sizing** - Boxes scale based on distance for better visibility
 - **Distance filtering** - Shows exact distance in meters for each entity
 
+### In-Game Dashboard
+- **Movable scrollable menu** opened with **Insert**
+- **Runtime status** showing tracked entities, camera state, cache age
+- **Rendering & filters** panel with toggles for enemies/players/animals/items and live render-distance slider
+- **Performance section** with sampled frame/cache timings
+- **Diagnostics tools** to refresh cache, dump log stats, or create diagnostic reports (.txt)
+
 ### Advanced Debugging System
 - **Robust file-based logging** with automatic log rotation
 - **Performance monitoring** with millisecond timing
@@ -119,6 +126,7 @@ The framework includes a comprehensive logging system with three types of logs:
 - Timestamped entries with millisecond precision
 - Game state tracking and camera information
 - Entity scanning statistics
+- Fixed log root path (or `SEVEN_DTDAIBOT_LOG_ROOT` override) so `.log` and diagnostic `.txt` files always land in `C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\logs`
 
 ## Troubleshooting
 
