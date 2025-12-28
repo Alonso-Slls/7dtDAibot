@@ -32,6 +32,17 @@ A comprehensive ESP (Extra Sensory Perception) and debugging framework for 7 Day
 - **F1** - Toggle ESP on/off
 - **F2** - Generate diagnostic report
 
+## ⚠️ Multithreading Stability Warning
+
+Unity APIs used by this framework (entity discovery, GUI drawing, camera access, etc.) must run on the main Unity thread. Running the ESP inside custom loaders, trainers, or injectors that spawn additional worker threads can lead to **race conditions and hard crashes**. Before experimenting with multithreaded helpers:
+
+1. Keep all ESPManager interactions on the Unity main thread.
+2. Avoid invoking `FindObjectsOfType`, `Camera.main`, or GUI calls from background threads.
+3. Do not overlap custom timers with the built‑in `InvokeRepeating` calls unless they are synchronized.
+4. If you introduce new threaded code, wrap file I/O and log-rotation logic with your own synchronization to prevent corruption.
+
+Proceed at your own risk—instability caused by multithreading is not supported.
+
 ## Installation
 
 1. Build the project:
@@ -65,7 +76,7 @@ A comprehensive ESP (Extra Sensory Perception) and debugging framework for 7 Day
 
 ## Repository
 
-**GitHub Repository:** https://github.com/Alonso-Slls/7dtDAibot/tree/master
+**GitHub Repository:** https://github.com/Alonso-Slls/7dtDAibot/tree/main
 
 ## Build Commands
 
@@ -163,7 +174,7 @@ When contributing to this project:
 ## Support
 
 For issues and support:
-1. Check the logs in the `logs/` directory
+  1. Check the logs in the `logs/` directory
 2. Generate a diagnostic report with F2
 3. Review the troubleshooting section above
 4. Ensure all dependencies are properly configured
