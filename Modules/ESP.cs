@@ -1,145 +1,160 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
+using System.Collections.Generic;
 
-namespace Game_7D2D.Modules
+namespace Modules
 {
-    /// <summary>
-    /// ESP (Extra Sensory Perception) rendering module for 7 Days to Die.
-    /// Provides visual overlays for entities including boxes and bone structures.
-    /// </summary>
-    class ESP
+    public class ESP
     {
-        private static Vector3 eb_head, eb_neck, eb_spine, eb_leftshoulder, eb_leftarm, eb_leftforearm, eb_lefthand, eb_rightshoulder, eb_rightarm, eb_rightforearm;
-        private static Vector3 eb_righthand, eb_hips, eb_leftupleg, eb_leftleg, eb_leftfoot, eb_rightupleg, eb_rightleg, eb_rightfoot;
-        /// <summary>
-        /// Draws ESP box and bone visualization for an enemy entity.
-        /// </summary>
-        /// <param name="entity">The enemy entity to visualize</param>
-        /// <param name="color">Color for the ESP box</param>
         public static void esp_drawBox(EntityEnemy entity, Color color)
         {
-            Vector3 entity_head = entity.transform.position;
-            Vector3 entity_feet = new Vector3(entity_head.x, entity_head.y + entity.height, entity_head.z);
-
-            Vector3 w2s_head = Camera.main.WorldToScreenPoint(entity_head);
-            Vector3 w2s_feet = Camera.main.WorldToScreenPoint(entity_feet);
-
-            float Distance = Vector3.Distance(entity.transform.position, Hacks.eLocalPlayer.transform.position);
-            Vector3 w2s_test = Camera.main.WorldToScreenPoint(entity.emodel.GetHeadTransform().position);
-
-            if (w2s_head.z > 0f && w2s_head.x > 0 && w2s_head.x < (float)Screen.width && w2s_head.y > 0 && Distance <= 100f)
+            if (entity == null || !entity.IsAlive()) return;
+            
+            // Get entity position
+            Vector3 entityPos = entity.transform.position;
+            
+            // Convert to screen coordinates
+            Vector3 w2s_head = Camera.main.WorldToScreenPoint(entityPos + Vector3.up * 1.8f);
+            Vector3 w2s_feet = Camera.main.WorldToScreenPoint(entityPos);
+            
+            // Check if entity is in front of camera
+            if (w2s_head.z <= 0 || w2s_feet.z <= 0) return;
+            
+            // Check distance (100m max)
+            float distance = Vector3.Distance(Camera.main.transform.position, entityPos);
+            if (distance > 100f) return;
+            
+            // Invert Y for GUI coordinates
+            w2s_head.y = Screen.height - w2s_head.y;
+            w2s_feet.y = Screen.height - w2s_feet.y;
+            
+            // Calculate box dimensions
+            float height = w2s_feet.y - w2s_head.y;
+            float width = height * 0.4f; // Width is 40% of height
+            
+            // Draw ESP box
+            DrawESPBox(w2s_head.x, w2s_head.y, width, height, color);
+            
+            // Draw entity name
+            string entityName = entity.GetEntityName();
+            Render.DrawString(w2s_head.x, w2s_head.y - 15, entityName, Color.white);
+            
+            // Draw distance
+            Render.DrawString(w2s_head.x, w2s_feet.y + 5, $"{distance:F1}m", Color.yellow);
+            
+            // Draw bones if enabled
+            if (Hacks.enemyBones)
             {
-                if (UI.t_ESPBoxes)
-                {
-                    DrawESPBox(w2s_feet, w2s_head, color, entity.EntityName);
-                    DrawESPBox(w2s_test, new Vector3(w2s_test.x - 1f, w2s_test.y - 1f, w2s_test.z), Color.green, "");
-                }
-
-                if (UI.t_EnemyBones)
-                {
-                    Transform[] entityBones = entity.GetComponentInChildren<SkinnedMeshRenderer>().bones;
-                    int canBone = 0;
-
-                    for (int j = 0; j < entityBones.Length; j++)
-                    {
-                        if (entityBones[j].name == "Head") { eb_head = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //Head
-                        if (entityBones[j].name == "Neck") { eb_neck = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //Neck
-                        if (entityBones[j].name == "Spine") { eb_spine = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //Spine
-                        if (entityBones[j].name == "LeftShoulder") { eb_leftshoulder = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftShoulder
-                        if (entityBones[j].name == "LeftArm") { eb_leftarm = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftArm
-                        if (entityBones[j].name == "LeftForeArm") { eb_leftforearm = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftForeArm
-                        if (entityBones[j].name == "LeftHand") { eb_lefthand = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftHand
-                        if (entityBones[j].name == "RightShoulder") { eb_rightshoulder = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightShoulder
-                        if (entityBones[j].name == "RightArm") { eb_rightarm = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightArm
-                        if (entityBones[j].name == "RightForeArm") { eb_rightforearm = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightForeArm
-                        if (entityBones[j].name == "RightHand") { eb_righthand = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightHand
-                        if (entityBones[j].name == "Hips") { eb_hips = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //Hips
-                        if (entityBones[j].name == "LeftUpLeg") { eb_leftupleg = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftUpLeg
-                        if (entityBones[j].name == "LeftLeg") { eb_leftleg = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftLeg
-                        if (entityBones[j].name == "LeftFoot") { eb_leftfoot = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //LeftFoot
-                        if (entityBones[j].name == "RightUpLeg") { eb_rightupleg = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightUpLeg
-                        if (entityBones[j].name == "RightLeg") { eb_rightleg = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightLeg
-                        if (entityBones[j].name == "RightFoot") { eb_rightfoot = Camera.main.WorldToScreenPoint(entityBones[j].transform.position); canBone++; } //RightFoot
-                    }
-
-                    if (canBone >= 18)
-                    {
-                        DrawESPLine(eb_head, eb_neck, Color.green);
-                        DrawESPLine(eb_neck, eb_spine, Color.green);
-                        DrawESPLine(eb_spine, eb_hips, Color.green);
-
-                        DrawESPLine(eb_hips, eb_leftupleg, Color.green);
-                        DrawESPLine(eb_leftupleg, eb_leftleg, Color.green);
-                        DrawESPLine(eb_leftleg, eb_leftfoot, Color.green);
-                        DrawESPLine(eb_hips, eb_rightupleg, Color.green);
-                        DrawESPLine(eb_rightupleg, eb_rightleg, Color.green);
-                        DrawESPLine(eb_rightleg, eb_rightfoot, Color.green);
-
-                        DrawESPLine(eb_neck, eb_leftshoulder, Color.green);
-                        DrawESPLine(eb_leftshoulder, eb_leftarm, Color.green);
-                        DrawESPLine(eb_leftarm, eb_leftforearm, Color.green);
-                        DrawESPLine(eb_leftforearm, eb_lefthand, Color.green);
-
-                        DrawESPLine(eb_neck, eb_rightshoulder, Color.green);
-                        DrawESPLine(eb_rightshoulder, eb_rightarm, Color.green);
-                        DrawESPLine(eb_rightarm, eb_rightforearm, Color.green);
-                        DrawESPLine(eb_rightforearm, eb_righthand, Color.green);
-                    }
-                }
-                
-            }
-            
-        }
-
-
-
-        private static void DrawESPBox(Vector3 objfootPos, Vector3 objheadPos, Color objColor, String name)
-        {
-            //Draw Basic ESP Method from Vector3 W2S input
-            float height = objheadPos.y - objfootPos.y;
-            float widthOffset = 2f;
-            float width = height / widthOffset;
-
-            // Use reusable Rect from Hacks class
-            var boxRect = Hacks.boxRect;
-            boxRect.x = objfootPos.x - (width / 2);
-            boxRect.y = (float)Screen.height - objfootPos.y - height;
-            boxRect.width = width;
-            boxRect.height = height;
-            
-            Render.DrawBox(boxRect.x, boxRect.y, boxRect.width, boxRect.height, objColor, 2f);
-            
-            if (name != "")
-            {
-                var labelRect = Hacks.labelRect;
-                labelRect.x = objfootPos.x - (width / 2);
-                labelRect.y = (float)Screen.height - objfootPos.y - height;
-                labelRect.width = width;
-                labelRect.height = 20;
-                
-                Render.DrawString(new Vector2(labelRect.x, labelRect.y), $"{name}");
+                DrawBones(entity);
             }
         }
-
-        private static void DrawESPText(Vector3 objfootPos, Vector3 objheadPos, Color objColor, String name)
-        {
-            //Draw Basic ESP Method from Vector3 W2S input
-            float height = objheadPos.y - objfootPos.y;
-            float widthOffset = 2f;
-            float width = height / widthOffset;
-
-            Render.DrawString(new Vector2(objfootPos.x - (width / 2), (float)Screen.height - objfootPos.y), $"{name}");
-            //GUI.Label(new Rect(objfootPos.x - (width / 2), (float)Screen.height - objfootPos.y - height, width, height), name);
-        }
-        private static void DrawESPLine(Vector3 pointA, Vector3 pointB, Color objColor)
-        {
-            Render.DrawLine(new Vector2(pointA.x, (float)Screen.height - pointA.y), new Vector2(pointB.x, (float)Screen.height - pointB.y), objColor, 1f);
-        }
-
         
+        public static void DrawESPBox(float x, float y, float width, float height, Color color)
+        {
+            // Draw box outline
+            Render.DrawBox(x - width/2, y, width, height, color, false);
+            
+            // Draw corner lines for better visibility
+            float cornerLength = 10f;
+            
+            // Top-left corner
+            Render.DrawLine(x - width/2, y, x - width/2 + cornerLength, y, color);
+            Render.DrawLine(x - width/2, y, x - width/2, y + cornerLength, color);
+            
+            // Top-right corner
+            Render.DrawLine(x + width/2, y, x + width/2 - cornerLength, y, color);
+            Render.DrawLine(x + width/2, y, x + width/2, y + cornerLength, color);
+            
+            // Bottom-left corner
+            Render.DrawLine(x - width/2, y + height, x - width/2 + cornerLength, y + height, color);
+            Render.DrawLine(x - width/2, y + height, x - width/2, y + height - cornerLength, color);
+            
+            // Bottom-right corner
+            Render.DrawLine(x + width/2, y + height, x + width/2 - cornerLength, y + height, color);
+            Render.DrawLine(x + width/2, y + height, x + width/2, y + height - cornerLength, color);
+        }
+        
+        public static void DrawBones(EntityEnemy entity)
+        {
+            try
+            {
+                // Get the entity's skinned mesh renderer
+                SkinnedMeshRenderer[] renderers = entity.GetComponentsInChildren<SkinnedMeshRenderer>();
+                
+                foreach (var renderer in renderers)
+                {
+                    if (renderer == null) continue;
+                    
+                    // Get bones
+                    Transform[] bones = renderer.bones;
+                    if (bones == null || bones.Length == 0) continue;
+                    
+                    // Find important bones and draw connections
+                    Transform head = null;
+                    Transform spine = null;
+                    Transform leftArm = null;
+                    Transform rightArm = null;
+                    Transform leftLeg = null;
+                    Transform rightLeg = null;
+                    
+                    foreach (var bone in bones)
+                    {
+                        if (bone == null) continue;
+                        
+                        string boneName = bone.name.ToLower();
+                        
+                        if (boneName.Contains("head"))
+                            head = bone;
+                        else if (boneName.Contains("spine") || boneName.Contains("chest"))
+                            spine = bone;
+                        else if (boneName.Contains("arm") && boneName.Contains("left"))
+                            leftArm = bone;
+                        else if (boneName.Contains("arm") && boneName.Contains("right"))
+                            rightArm = bone;
+                        else if (boneName.Contains("leg") && boneName.Contains("left"))
+                            leftLeg = bone;
+                        else if (boneName.Contains("leg") && boneName.Contains("right"))
+                            rightLeg = bone;
+                    }
+                    
+                    // Draw bone connections
+                    if (head != null && spine != null)
+                        DrawBoneLine(head, spine, Color.green);
+                        
+                    if (spine != null)
+                    {
+                        if (leftArm != null)
+                            DrawBoneLine(spine, leftArm, Color.green);
+                        if (rightArm != null)
+                            DrawBoneLine(spine, rightArm, Color.green);
+                        if (leftLeg != null)
+                            DrawBoneLine(spine, leftLeg, Color.green);
+                        if (rightLeg != null)
+                            DrawBoneLine(spine, rightLeg, Color.green);
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Error drawing bones: {e.Message}");
+            }
+        }
+        
+        private static void DrawBoneLine(Transform bone1, Transform bone2, Color color)
+        {
+            if (bone1 == null || bone2 == null) return;
+            
+            Vector3 w2s_bone1 = Camera.main.WorldToScreenPoint(bone1.position);
+            Vector3 w2s_bone2 = Camera.main.WorldToScreenPoint(bone2.position);
+            
+            // Check if bones are in front of camera
+            if (w2s_bone1.z <= 0 || w2s_bone2.z <= 0) return;
+            
+            // Invert Y for GUI coordinates
+            w2s_bone1.y = Screen.height - w2s_bone1.y;
+            w2s_bone2.y = Screen.height - w2s_bone2.y;
+            
+            // Draw line between bones
+            Render.DrawLine(w2s_bone1.x, w2s_bone1.y, w2s_bone2.x, w2s_bone2.y, color);
+        }
     }
 }

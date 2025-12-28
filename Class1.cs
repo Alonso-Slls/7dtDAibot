@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Game_7D2D
 {
@@ -6,21 +6,16 @@ namespace Game_7D2D
     {
         public static void init()
         {
-            Loader.Load = new GameObject();
-            Loader.Load.AddComponent<Hacks>();
-            UnityEngine.Object.DontDestroyOnLoad(Loader.Load);
+            // Create the main GameObject for our hack
+            GameObject hackObject = new GameObject("ESP_Hack");
+            
+            // Add the Hacks component which contains all the logic
+            hackObject.AddComponent<Hacks>();
+            
+            // Make sure the object persists between scene loads
+            UnityEngine.Object.DontDestroyOnLoad(hackObject);
+            
+            Debug.Log("7D2D ESP Hack Loaded Successfully");
         }
-
-        public static void unload()
-        {
-            _unload();
-        }
-
-        private static void _unload()
-        {
-            GameObject.Destroy(Load);
-        }
-        
-        private static GameObject Load;
     }
 }

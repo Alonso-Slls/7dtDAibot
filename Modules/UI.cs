@@ -1,44 +1,91 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Game_7D2D.Modules
+namespace Modules
 {
-    class UI
+    public class UI
     {
-        //******* ESP Toggle Variables ********
-        public static bool t_EnemyESP = false;
-        public static bool t_EnemyBones = false;
-        public static bool t_ESPBoxes = true;
-
-        private static bool toggleEnemy = false;
-        private static bool toggleEnemyBones = false;
-        private static bool toggleESPBoxes = false;
-
-
-        public static string dbg = "debug";
+        private static readonly int MENU_WIDTH = 200;
+        private static readonly int MENU_HEIGHT = 150;
+        private static readonly int MENU_X = 50;
+        private static readonly int MENU_Y = 50;
+        
         public static void DrawMenu()
         {
-            if (Hacks.Menu && Hacks.isLoaded)
+            if (!Hacks.showMenu) return;
+            
+            // Draw menu background
+            GUI.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            GUI.DrawTexture(new Rect(MENU_X, MENU_Y, MENU_WIDTH, MENU_HEIGHT), Texture2D.whiteTexture);
+            
+            // Draw menu border
+            GUI.color = Color.white;
+            GUI.DrawTexture(new Rect(MENU_X, MENU_Y, MENU_WIDTH, 2), Texture2D.whiteTexture); // Top
+            GUI.DrawTexture(new Rect(MENU_X, MENU_Y + MENU_HEIGHT - 2, MENU_WIDTH, 2), Texture2D.whiteTexture); // Bottom
+            GUI.DrawTexture(new Rect(MENU_X, MENU_Y, 2, MENU_HEIGHT), Texture2D.whiteTexture); // Left
+            GUI.DrawTexture(new Rect(MENU_X + MENU_WIDTH - 2, MENU_Y, 2, MENU_HEIGHT), Texture2D.whiteTexture); // Right
+            
+            // Draw title
+            GUI.color = Color.cyan;
+            Render.DrawString(MENU_X + 10, MENU_Y + 10, "7D2D ESP Menu", Color.cyan);
+            
+            // Draw menu options
+            GUI.color = Color.white;
+            
+            // Enemy ESP toggle
+            string espStatus = Hacks.enemyESP ? "[ON]" : "[OFF]";
+            Color espColor = Hacks.enemyESP ? Color.green : Color.red;
+            Render.DrawString(MENU_X + 10, MENU_Y + 40, $"Enemy ESP {espStatus}", espColor);
+            
+            // Enemy Bones toggle
+            string bonesStatus = Hacks.enemyBones ? "[ON]" : "[OFF]";
+            Color bonesColor = Hacks.enemyBones ? Color.green : Color.red;
+            Render.DrawString(MENU_X + 10, MENU_Y + 60, $"Enemy Bones {bonesStatus}", bonesColor);
+            
+            // Instructions
+            GUI.color = Color.yellow;
+            Render.DrawString(MENU_X + 10, MENU_Y + 90, "F1: Toggle Menu", Color.yellow);
+            Render.DrawString(MENU_X + 10, MENU_Y + 110, "END: Unload Hack", Color.yellow);
+            
+            // Entity count
+            GUI.color = Color.white;
+            Render.DrawString(MENU_X + 10, MENU_Y + 130, $"Enemies: {Hacks.eEnemy.Count}", Color.white);
+            
+            // Handle mouse clicks for toggles
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
             {
-                GUI.Box(new Rect(5f, 5f, 250f, 85f), "");
-                GUI.Label(new Rect(10f, 5f, 250f, 30f), "\x37\x44\x61\x79\x73\x32\x44\x69\x65\x20\x2d\x20\x45\x53\x50\x20\x4d\x6f\x64");
-
-                toggleEnemy = GUI.Toggle(new Rect(10f, 30f, 250f, 25f), t_EnemyESP, "Enemy ESP");
-                if (toggleEnemy != t_EnemyESP)
+                Vector2 mousePos = Event.current.mousePosition;
+                
+                // Check Enemy ESP toggle click
+                if (mousePos.x >= MENU_X + 10 && mousePos.x <= MENU_X + 150 &&
+                    mousePos.y >= MENU_Y + 40 && mousePos.y <= MENU_Y + 55)
                 {
-                    t_EnemyESP = !t_EnemyESP;
+                    Hacks.enemyESP = !Hacks.enemyESP;
+                    Event.current.Use();
                 }
                 
-                toggleEnemyBones = GUI.Toggle(new Rect(10f, 55f, 250f, 25f), t_EnemyBones, "Enemy Bones");
-                if (toggleEnemyBones != t_EnemyBones)
+                // Check Enemy Bones toggle click
+                if (mousePos.x >= MENU_X + 10 && mousePos.x <= MENU_X + 150 &&
+                    mousePos.y >= MENU_Y + 60 && mousePos.y <= MENU_Y + 75)
                 {
-                    t_EnemyBones = !t_EnemyBones;
+                    Hacks.enemyBones = !Hacks.enemyBones;
+                    Event.current.Use();
                 }
             }
+        }
+        
+        public static void DrawWatermark()
+        {
+            if (!Hacks.showMenu) return;
+            
+            // Draw watermark in bottom right corner
+            string watermark = "7D2D ESP v1.0";
+            Vector2 watermarkSize = GUI.skin.label.CalcSize(new GUIContent(watermark));
+            
+            float x = Screen.width - watermarkSize.x - 10;
+            float y = Screen.height - watermarkSize.y - 10;
+            
+            GUI.color = new Color(0.5f, 0.5f, 0.5f, 0.7f);
+            Render.DrawString(x, y, watermark, Color.gray);
         }
     }
 }
