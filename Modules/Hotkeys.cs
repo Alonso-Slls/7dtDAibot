@@ -12,11 +12,11 @@ namespace Game_7D2D.Modules
         public static void hotkeys()
         {
             
-            if (Input.GetKeyDown(KeyCode.End)) // Kill hacks on "End" key pressed
+            if (Input.GetKeyDown(ESPConfig.UnloadKey)) // Kill hacks on unload key pressed
             {
                 Loader.unload();
             }
-            if (Input.GetKeyDown(KeyCode.Insert))
+            if (Input.GetKeyDown(ESPConfig.ToggleMenuKey))
             {
                 Hacks.Menu = !Hacks.Menu;
             }

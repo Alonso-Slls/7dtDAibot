@@ -16,6 +16,14 @@ namespace Game_7D2D
         public static List<EntityEnemy> eEnemy = new List<EntityEnemy>();
         public static LocalPlayer localP;
         public static EntityPlayerLocal eLocalPlayer;
+        
+        // Entity caching for performance
+        private static List<EntityData> cachedEntities = new List<EntityData>();
+        private static float lastScanTime = 0f;
+        
+        // Reusable objects to reduce GC
+        public static Rect boxRect = new Rect();
+        public static Rect labelRect = new Rect();
 
         //Menu Variables
         public static bool Menu = true;
@@ -24,7 +32,8 @@ namespace Game_7D2D
 
         public void Start()
         {
-            
+            // Load configuration
+            ESPConfig.LoadConfig();
         }
 
         public void Update()
@@ -37,13 +46,15 @@ namespace Game_7D2D
                 if (Timer >= 5f)
                 {
                     Timer = 0f;
-
                     updateObjects();
-
                 }
-
-
-
+                
+                // Scan entities at fixed interval for performance
+                if (Modules.UI.t_EnemyESP && Time.time - lastScanTime > ESPConfig.EntityScanInterval)
+                {
+                    ScanEntities();
+                    lastScanTime = Time.time;
+                }
             }
             
             checkState();
@@ -62,11 +73,12 @@ namespace Game_7D2D
 
             if (Modules.UI.t_EnemyESP)
             {
-                foreach (EntityEnemy Enemy in eEnemy)
+                // Render cached entities instead of scanning every frame
+                foreach (var entityData in cachedEntities)
                 {
-                    if (Enemy != null && Enemy.IsAlive())
+                    if (entityData.Entity != null && entityData.Entity.IsAlive())
                     {
-                        Modules.ESP.esp_drawBox(Enemy, Color.red);
+                        Modules.ESP.esp_drawBox(entityData.Entity, entityData.Color);
                     }
                 }
             }
@@ -90,6 +102,55 @@ namespace Game_7D2D
             }
             Hacks.localP = UnityEngine.GameObject.FindObjectOfType<LocalPlayer>();
             Hacks.eLocalPlayer = UnityEngine.GameObject.FindObjectOfType<EntityPlayerLocal>();
+        }
+        
+        private static void ScanEntities()
+        {
+            cachedEntities.Clear();
+            
+            if (Hacks.eLocalPlayer == null) return;
+            
+            Vector3 cameraPos = Hacks.eLocalPlayer.transform.position;
+            
+            try
+            {
+                var enemies = UnityEngine.GameObject.FindObjectsOfType<EntityEnemy>();
+                if (enemies != null)
+                {
+                    foreach (var enemy in enemies)
+                    {
+                        if (enemy == null || !enemy.IsAlive()) continue;
+                        
+                        float distance = Vector3.Distance(cameraPos, enemy.transform.position);
+                        
+                        // Distance culling
+                        if (distance > ESPConfig.MaxESPDistance) continue;
+                        
+                        cachedEntities.Add(new EntityData
+                        {
+                            Entity = enemy,
+                            Color = ESPConfig.EnemyColor,
+                            Label = "Enemy",
+                            Position = enemy.transform.position,
+                            Distance = distance
+                        });
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                // Log error if needed
+            }
+        }
+        
+        // Helper class to cache entity data
+        private class EntityData
+        {
+            public EntityEnemy Entity;
+            public Color Color;
+            public string Label;
+            public Vector3 Position;
+            public float Distance;
         }
 
         

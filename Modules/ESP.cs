@@ -95,10 +95,24 @@ namespace Game_7D2D.Modules
             float widthOffset = 2f;
             float width = height / widthOffset;
 
-            Render.DrawBox(objfootPos.x - (width / 2), (float)Screen.height - objfootPos.y - height, width, height, objColor, 2f);
+            // Use reusable Rect from Hacks class
+            var boxRect = Hacks.boxRect;
+            boxRect.x = objfootPos.x - (width / 2);
+            boxRect.y = (float)Screen.height - objfootPos.y - height;
+            boxRect.width = width;
+            boxRect.height = height;
+            
+            Render.DrawBox(boxRect.x, boxRect.y, boxRect.width, boxRect.height, objColor, 2f);
+            
             if (name != "")
             {
-                Render.DrawString(new Vector2(objfootPos.x - (width / 2), (float)Screen.height - objfootPos.y - height), $"{name}");
+                var labelRect = Hacks.labelRect;
+                labelRect.x = objfootPos.x - (width / 2);
+                labelRect.y = (float)Screen.height - objfootPos.y - height;
+                labelRect.width = width;
+                labelRect.height = 20;
+                
+                Render.DrawString(new Vector2(labelRect.x, labelRect.y), $"{name}");
             }
         }
 
