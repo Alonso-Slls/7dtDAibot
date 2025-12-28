@@ -11,7 +11,6 @@ namespace SevenDtDAibot
         private Camera mainCamera;
         private bool showESP = true;
         private bool showMenu = false;
-        private float lastUpdateTime = 0f;
         private int entityCount = 0;
         
         // Entity caching system
@@ -24,14 +23,19 @@ namespace SevenDtDAibot
         
         // Distance culling settings
         private float maxRenderDistance = 100f; // Maximum render distance in meters
-        private bool showDistanceSlider = false;
         
         // ESP toggle settings
         private bool showEnemyESP = true;
         private bool showPlayerESP = true;
         private bool showAnimalESP = true;
         private bool showItemESP = true;
-        private bool showAdvancedSettings = false;
+        private bool showPerformancePanel = true;
+        private bool showRenderPanel = true;
+        private bool showDiagnosticsPanel = true;
+        private Rect menuRect = new Rect(15, 15, 350, 430);
+        private Vector2 menuScrollPosition = Vector2.zero;
+        private GUIStyle headerLabelStyle;
+        private GUIStyle infoLabelStyle;
         
         // Performance monitoring
         private float avgFrameTime = 0f;
@@ -40,6 +44,7 @@ namespace SevenDtDAibot
         private float totalFrameTime = 0f;
         private float totalCacheTime = 0f;
         private readonly int performanceSampleSize = 60; // 1 second at 60 FPS
+        private int cacheSampleCount = 0;
         
         void Start()
         {
@@ -56,6 +61,8 @@ namespace SevenDtDAibot
             // Log initial state
             RobustDebugger.LogGameState();
             RobustDebugger.CreateDiagnosticReport();
+
+            InitializeStyles();
         }
         
         void FindCamera()
@@ -130,6 +137,22 @@ namespace SevenDtDAibot
             RobustDebugger.LogFrame($"ESP={showESP}, Menu={showMenu}, CacheAge={(Time.time - lastEntityUpdate):F2}s");
         }
         
+        void InitializeStyles()
+        {
+            headerLabelStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 15,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = Color.white }
+            };
+            
+            infoLabelStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 12,
+                normal = { textColor = Color.white }
+            };
+        }
+        
         void OnGUI()
         {
             if (showMenu)
@@ -160,74 +183,122 @@ namespace SevenDtDAibot
         
         void DrawMenu()
         {
-            GUI.Box(new Rect(10, 10, 250, showAdvancedSettings ? 350 : 230), "Basic ESP Menu");
-            
-            showESP = GUI.Toggle(new Rect(20, 40, 230, 20), showESP, "Show ESP");
-            
-            // Show debug info
-            GUI.Label(new Rect(20, 70, 230, 20), $"Entities: {entityCount}");
-            GUI.Label(new Rect(20, 90, 230, 20), $"Camera: {(mainCamera != null ? "Found" : "None")}");
-            GUI.Label(new Rect(20, 110, 230, 20), $"Cache Age: {(Time.time - lastEntityUpdate):F1}s");
-            GUI.Label(new Rect(20, 130, 230, 20), $"Max Distance: {maxRenderDistance:F0}m");
-            GUI.Label(new Rect(20, 150, 230, 20), $"FPS: {(avgFrameTime > 0 ? (1000f / avgFrameTime).ToString("F0") : "---")}");
-            
-            // Advanced settings toggle
-            if (GUI.Button(new Rect(20, 170, 230, 20), "Advanced Settings"))
+            if (headerLabelStyle == null || infoLabelStyle == null)
             {
-                showAdvancedSettings = !showAdvancedSettings;
-                RobustDebugger.LogInfo("Input", $"Advanced settings toggled: {showAdvancedSettings}");
+                InitializeStyles();
             }
             
-            if (showAdvancedSettings)
-            {
-                // ESP type toggles
-                GUI.Label(new Rect(20, 195, 230, 20), "ESP Types:");
-                showEnemyESP = GUI.Toggle(new Rect(30, 215, 100, 20), showEnemyESP, "Enemies");
-                showPlayerESP = GUI.Toggle(new Rect(140, 215, 100, 20), showPlayerESP, "Players");
-                showAnimalESP = GUI.Toggle(new Rect(30, 235, 100, 20), showAnimalESP, "Animals");
-                showItemESP = GUI.Toggle(new Rect(140, 235, 100, 20), showItemESP, "Items");
-                
-                // Distance slider
-                GUI.Label(new Rect(20, 260, 230, 20), "Render Distance:");
-                float newDistance = GUI.HorizontalSlider(new Rect(20, 280, 180, 20), maxRenderDistance, 50f, 500f);
-                if (newDistance != maxRenderDistance)
-                {
-                    maxRenderDistance = newDistance;
-                    RobustDebugger.LogInfo("Settings", $"Max render distance updated: {maxRenderDistance:F0}m");
-                }
-                GUI.Label(new Rect(205, 280, 45, 20), $"{maxRenderDistance:F0}m");
-                
-                // Performance info
-                GUI.Label(new Rect(20, 305, 230, 20), $"Active ESP: {(showEnemyESP ? "E" : "")}{(showPlayerESP ? "P" : "")}{(showAnimalESP ? "A" : "")}{(showItemESP ? "I" : "")}");
-                GUI.Label(new Rect(20, 325, 230, 20), $"Avg Frame: {avgFrameTime:F2}ms | Cache: {avgCacheTime:F2}ms");
-            }
-            else
-            {
-                // Distance slider (simplified view)
-                if (GUI.Button(new Rect(20, 195, 230, 20), "Distance Settings"))
-                {
-                    showDistanceSlider = !showDistanceSlider;
-                    RobustDebugger.LogInfo("Input", $"Distance settings toggled: {showDistanceSlider}");
-                }
-                
-                if (showDistanceSlider)
-                {
-                    GUI.Label(new Rect(20, 220, 230, 20), "Render Distance:");
-                    float newDistance = GUI.HorizontalSlider(new Rect(20, 240, 180, 20), maxRenderDistance, 50f, 500f);
-                    if (newDistance != maxRenderDistance)
-                    {
-                        maxRenderDistance = newDistance;
-                        RobustDebugger.LogInfo("Settings", $"Max render distance updated: {maxRenderDistance:F0}m");
-                    }
-                    GUI.Label(new Rect(205, 240, 45, 20), $"{maxRenderDistance:F0}m");
-                }
-            }
+            menuRect = GUI.Window(0, menuRect, DrawMenuWindow, "7D2D ESP Dashboard");
+        }
+        
+        void DrawMenuWindow(int windowId)
+        {
+            GUILayout.BeginVertical(GUILayout.Width(330));
+            menuScrollPosition = GUILayout.BeginScrollView(menuScrollPosition, false, true, GUILayout.Height(370));
             
-            if (GUI.Button(new Rect(20, showAdvancedSettings ? 355 : showDistanceSlider ? 270 : 180, 230, 30), "Close (Insert)"))
+            DrawStatusSection();
+            GUILayout.Space(8);
+            DrawRenderSection();
+            GUILayout.Space(8);
+            DrawPerformanceSection();
+            GUILayout.Space(8);
+            DrawDiagnosticsSection();
+            
+            GUILayout.EndScrollView();
+            
+            if (GUILayout.Button("Close Menu (Insert)", GUILayout.Height(28)))
             {
                 showMenu = false;
                 RobustDebugger.LogInfo("Input", "Menu closed via button");
             }
+            
+            GUILayout.EndVertical();
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+        
+        void DrawStatusSection()
+        {
+            GUILayout.Label("Runtime Status", headerLabelStyle);
+            showESP = GUILayout.Toggle(showESP, "Master ESP Toggle");
+            
+            GUILayout.Label($"Entities Tracked: {entityCount}", infoLabelStyle);
+            GUILayout.Label($"Camera State: {(mainCamera != null ? "Active" : "Missing")}", infoLabelStyle);
+            GUILayout.Label($"Cache Age: {(Time.time - lastEntityUpdate):F1}s", infoLabelStyle);
+        }
+        
+        void DrawRenderSection()
+        {
+            showRenderPanel = GUILayout.Toggle(showRenderPanel, "Rendering & Filters", GUI.skin.button);
+            if (!showRenderPanel) return;
+            
+            GUILayout.BeginVertical("box");
+            GUILayout.Label("Entity Types", headerLabelStyle);
+            GUILayout.BeginHorizontal();
+            showEnemyESP = GUILayout.Toggle(showEnemyESP, "Enemies");
+            showPlayerESP = GUILayout.Toggle(showPlayerESP, "Players");
+            GUILayout.EndHorizontal();
+            
+            GUILayout.BeginHorizontal();
+            showAnimalESP = GUILayout.Toggle(showAnimalESP, "Animals");
+            showItemESP = GUILayout.Toggle(showItemESP, "Items");
+            GUILayout.EndHorizontal();
+            
+            GUILayout.Space(4);
+            GUILayout.Label($"Render Distance: {maxRenderDistance:F0}m");
+            float newDistance = GUILayout.HorizontalSlider(maxRenderDistance, 50f, 500f);
+            if (!Mathf.Approximately(newDistance, maxRenderDistance))
+            {
+                maxRenderDistance = newDistance;
+                RobustDebugger.LogInfo("Settings", $"Max render distance updated: {maxRenderDistance:F0}m");
+            }
+            
+            if (GUILayout.Button("Force Cache Refresh"))
+            {
+                UpdateEntityCache();
+                RobustDebugger.LogInfo("Settings", "Entity cache forced via GUI");
+            }
+            
+            GUILayout.EndVertical();
+        }
+        
+        void DrawPerformanceSection()
+        {
+            showPerformancePanel = GUILayout.Toggle(showPerformancePanel, "Performance", GUI.skin.button);
+            if (!showPerformancePanel) return;
+            
+            GUILayout.BeginVertical("box");
+            string fpsLabel = avgFrameTime > 0 ? (1000f / avgFrameTime).ToString("F0") : "---";
+            GUILayout.Label($"Average Frame Time: {avgFrameTime:F2}ms (~{fpsLabel} FPS)", infoLabelStyle);
+            GUILayout.Label($"Average Cache Time: {avgCacheTime:F2}ms", infoLabelStyle);
+            GUILayout.Label($"Samples: Frame={frameCount}, Cache={cacheSampleCount}", infoLabelStyle);
+            GUILayout.EndVertical();
+        }
+        
+        void DrawDiagnosticsSection()
+        {
+            showDiagnosticsPanel = GUILayout.Toggle(showDiagnosticsPanel, "Diagnostics", GUI.skin.button);
+            if (!showDiagnosticsPanel) return;
+            
+            GUILayout.BeginVertical("box");
+            GUILayout.Label("Generate reports and inspect logs.", infoLabelStyle);
+            
+            if (GUILayout.Button("Generate Diagnostic Report (.txt)"))
+            {
+                RobustDebugger.CreateDiagnosticReport();
+                RobustDebugger.LogInfo("Diagnostics", "Report requested from GUI");
+            }
+            
+            if (GUILayout.Button("Log Current Stats"))
+            {
+                RobustDebugger.LogInfo("Diagnostics", RobustDebugger.GetLogStats());
+            }
+            
+            if (GUILayout.Button("Toggle Menu Visibility"))
+            {
+                showMenu = false;
+            }
+            
+            GUILayout.EndVertical();
         }
         
         void DrawESP()

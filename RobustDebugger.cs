@@ -11,7 +11,8 @@ namespace SevenDtDAibot
     /// </summary>
     public static class RobustDebugger
     {
-        private static readonly string LogDirectory = "logs";
+        private static readonly string RootDirectory = ResolveRootDirectory();
+        private static readonly string LogDirectory = Path.Combine(RootDirectory, "logs");
         private static readonly string LogFileName = "esp_debug.log";
         private static readonly string LogFilePath = Path.Combine(LogDirectory, LogFileName);
         private static readonly string ErrorLogFileName = "esp_errors.log";
@@ -43,13 +44,16 @@ namespace SevenDtDAibot
                     if (!Directory.Exists(LogDirectory))
                     {
                         Directory.CreateDirectory(LogDirectory);
-                        LogInfo("RobustDebugger", $"Created log directory: {LogDirectory}");
+                        Debug.Log($"[RobustDebugger] Created log directory: {LogDirectory}");
                     }
                     
                     // Rotate old logs if they're too large
                     RotateLogIfNeeded(LogFilePath);
                     RotateLogIfNeeded(ErrorLogFilePath);
                     RotateLogIfNeeded(PerformanceLogFilePath);
+
+                    // Ensure log files exist immediately (even before first log call)
+                    EnsureLogFiles();
                     
                     // Initialize performance tracking
                     _performanceStopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -353,6 +357,39 @@ namespace SevenDtDAibot
         }
         
         /// <summary>
+        /// Ensure the primary log files are created so other systems can tail them immediately.
+        /// </summary>
+        private static void EnsureLogFiles()
+        {
+            try
+            {
+                lock (_lockObject)
+                {
+                    TouchFile(LogFilePath, "INFO", "RobustDebugger", "Log file initialized");
+                    TouchFile(ErrorLogFilePath, "INFO", "RobustDebugger", "Error log initialized");
+                    TouchFile(PerformanceLogFilePath, "INFO", "RobustDebugger", "Performance log initialized");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[RobustDebugger] Failed to ensure log files: {ex.Message}");
+            }
+        }
+
+        private static void TouchFile(string path, string level, string source, string message)
+        {
+            bool fileExists = File.Exists(path);
+            using (var writer = File.AppendText(path))
+            {
+                if (!fileExists)
+                {
+                    writer.WriteLine(FormatMessage(level, source, message));
+                    writer.Flush();
+                }
+            }
+        }
+
+        /// <summary>
         /// Rotate log files if they exceed size limit.
         /// </summary>
         private static void RotateLogIfNeeded(string filePath)
@@ -455,6 +492,63 @@ namespace SevenDtDAibot
             catch (Exception ex)
             {
                 return $"Failed to get log stats: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Ensure we always have a deterministic base directory for log output.
+        /// </summary>
+        private static string ResolveRootDirectory()
+        {
+            // 1) Explicit override via environment variable so power users can relocate logs
+            try
+            {
+                string envOverride = Environment.GetEnvironmentVariable("SEVEN_DTDAIBOT_LOG_ROOT");
+                if (!string.IsNullOrWhiteSpace(envOverride))
+                {
+                    return envOverride;
+                }
+            }
+            catch
+            {
+                // Ignore and try the preferred location below
+            }
+
+            // 2) Preferred repo location (requested path)
+            const string preferredRepoPath = @"C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-";
+            try
+            {
+                if (Directory.Exists(preferredRepoPath))
+                {
+                    return preferredRepoPath;
+                }
+            }
+            catch
+            {
+                // Ignore and continue with fallbacks
+            }
+
+            // 3) Fall back to Unity/AppDomain base directory (works during local play mode)
+            try
+            {
+                if (!string.IsNullOrEmpty(AppDomain.CurrentDomain.BaseDirectory))
+                {
+                    return AppDomain.CurrentDomain.BaseDirectory;
+                }
+            }
+            catch
+            {
+                // Ignored - we'll fall back to other options.
+            }
+
+            // 4) Absolute last resorts
+            try
+            {
+                return Directory.GetCurrentDirectory();
+            }
+            catch
+            {
+                return Path.GetTempPath();
             }
         }
     }
