@@ -1,33 +1,84 @@
-7 Days 2 Die - C# DLL Source [Base]
+# 7 Days to Die - Simplified ESP Mod
 
-Note: This mod works with Wemod loaded aswell.
-This is a basic mod menu created in C#. It is a base which you can add your own items to it or modifications. Currently it has the following.
+## Overview
+A lightweight ESP (wallhack) mod for 7 Days to Die beta version. This mod provides clean enemy visualization with box ESP and bone skeleton drawing, optimized for performance and simplicity.
 
- - ESP (Animals, Zombies/Enemies, Players, Dropped Items)
- - Bone ESP for enemies only.
- - Press Numpad 1 to enable Creative Menu (Works in online servers also)
- - Aimbot (Select for Enemies, Players or Animals)
- Note: For Aimbot, just equip any rifle, pistol, smg, shotgun and right click (ADS) and move towards the enemy. It will snap to their head
- 
-To improve performance, Threading was added to the code. This was causing a memory access violation which would kill the game after about 20-30 seconds. The code will remain the same as the older process for reliability. There will be short lag spikes now and then.
- 
-Insert Key - Show/Hide Menu End Key - Unload DLL File safely
+## Features
+- **Enemy ESP Boxes** - Red bounding boxes around enemies with entity names
+- **Enemy Bone ESP** - Green skeletal structure showing enemy bone positions
+- **Simple Menu** - Clean toggle interface with just essential options
+- **Performance Optimized** - Removed unnecessary features for better performance
 
-To compile..
+## Removed Features (from original)
+-
 
-    Download & Open Sln file for Visual Studio
-    Compile in Debug or Release (Doesn't matter)
+# 7 Days to Die - Simplified ESP Mod
 
-To Inject..
+## Overview
+A lightweight ESP (wallhack) mod for 7 Days to Die beta version. This mod provides clean enemy visualization with box ESP and bone skeleton drawing, optimized for performance and simplicity.
 
-    Use a Mono injector (Possibly MonoSharpInjector)
-    Select Process and browse to the assembly to inject (Game_7D2D.dll)
-    Use the following settings.. -- Namespace: Game_7D2D -- Class name: Loader -- Method name: init
-    Press inject
+## Features
+- **Enemy ESP Boxes** - Red bounding boxes around enemies with entity names
+- **Enemy Bone ESP** - Green skeletal structure showing enemy bone positions
+- **Simple Menu** - Clean toggle interface with just essential options
+- **Performance Optimized** - Removed unnecessary features for better performance
 
+## Removed Features (from original)
+- Aimbot functionality (completely removed)
+- Creative menu activation
+- Non-enemy ESP (items, NPCs, players, animals)
+- ESP lines drawing
+- Complex menu system
 
-![image](https://user-images.githubusercontent.com/38970826/180594355-e194b91e-ef4b-4c8c-896a-457d524f05fc.png)
+## Controls
+- **Insert Key** - Show/Hide menu
+- **End Key** - Unload DLL safely
+- **Mouse** - Use menu toggles to enable/disable features
 
+## Installation
+1. Compile the project using Visual Studio
+2. Use a Mono injector (like MonoSharpInjector)
+3. Select 7 Days to Die process
+4. Browse to `Game_7D2D.dll`
+5. Use injection settings:
+   - Namespace: `Game_7D2D`
+   - Class name: [Loader](cci:2://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Class1.cs:4:4-24:5)
+   - Method name: [init](cci:1://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Class1.cs:6:8-11:9)
+6. Press inject
 
-![image](https://user-images.githubusercontent.com/38970826/180594413-3e7502c3-58b7-4989-a600-cadca337c042.png)
+## Technical Details
+- **Framework**: C# with Unity/Mono
+- **Target**: 7 Days to Die (Beta version)
+- **Rendering**: Custom OnGUI drawing system
+- **Entity Detection**: GameObject.FindObjectsOfType
+- **Update Rate**: 5-second intervals for entity scanning
 
+## File Structure
+```
+
+# 7 Days to Die - Simplified ESP Mod
+
+## Overview
+Lightweight ESP mod for 7 Days to Die beta with enemy boxes and bone drawing.
+
+## Features
+- Enemy ESP boxes (red with names)
+- Enemy bone skeleton (green)
+- Simple toggle menu
+- Performance optimized
+
+## Controls
+- Insert: Show/Hide menu
+- End: Unload DLL
+
+## Installation
+1. Compile in Visual Studio
+2. Use Mono injector
+3. Settings: Namespace `Game_7D2D`, Class [Loader](cci:2://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Class1.cs:4:4-24:5), Method [init](cci:1://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Class1.cs:6:8-11:9)
+
+## Files
+- [Hacks.cs](cci:7://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Hacks.cs:0:0-0:0) - Main controller
+- [ESP.cs](cci:7://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Modules/ESP.cs:0:0-0:0) - ESP rendering
+- [UI.cs](cci:7://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Modules/UI.cs:0:0-0:0) - Menu system
+- [Render.cs](cci:7://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Render.cs:0:0-0:0) - Drawing utilities
+- [Hotkeys.cs](cci:7://file:///c:/Users/anoni/OneDrive/Escritorio/7/7Days2Die-ESP-Aimbot--Internal-/Modules/Hotkeys.cs:0:0-0:0) - Input handling
