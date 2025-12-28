@@ -26,6 +26,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+!/logs/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -343,9 +344,6 @@ healthchecksdb
 # Log files from the mod
 mod_*.log
 injection_*.log
-logs/
-
-# Configuration files (keep templates)
 config.json
 settings.json
 user_*.json
