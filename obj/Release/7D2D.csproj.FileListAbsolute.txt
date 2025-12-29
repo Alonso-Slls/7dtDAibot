@@ -1,0 +1,6 @@
+C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\bin\Release\Game_7D2D.dll
+C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\bin\Release\Game_7D2D.pdb
+C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\obj\Release\7D2D.csproj.AssemblyReference.cache
+C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\obj\Release\7D2D.csproj.CoreCompileInputs.cache
+C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\obj\Release\Game_7D2D.dll
+C:\Users\anoni\OneDrive\Escritorio\7\7Days2Die-ESP-Aimbot--Internal-\obj\Release\Game_7D2D.pdb

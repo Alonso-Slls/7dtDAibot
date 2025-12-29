@@ -35,7 +35,7 @@ namespace Modules
             DrawESPBox(w2s_head.x, w2s_head.y, width, height, color);
             
             // Draw entity name
-            string entityName = entity.GetEntityName();
+            string entityName = entity.name;
             Render.DrawString(w2s_head.x, w2s_head.y - 15, entityName, Color.white);
             
             // Draw distance
