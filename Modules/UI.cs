@@ -32,13 +32,13 @@ namespace Modules
             GUI.color = Color.white;
             
             // Enemy ESP toggle
-            string espStatus = Hacks.enemyESP ? "[ON]" : "[OFF]";
-            Color espColor = Hacks.enemyESP ? Color.green : Color.red;
+            string espStatus = ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]";
+            Color espColor = ESPSettings.ShowEnemyESP ? Color.green : Color.red;
             Render.DrawString(MENU_X + 10, MENU_Y + 40, $"Enemy ESP {espStatus}", espColor);
             
             // Enemy Bones toggle
-            string bonesStatus = Hacks.enemyBones ? "[ON]" : "[OFF]";
-            Color bonesColor = Hacks.enemyBones ? Color.green : Color.red;
+            string bonesStatus = ESPSettings.ShowEnemyBones ? "[ON]" : "[OFF]";
+            Color bonesColor = ESPSettings.ShowEnemyBones ? Color.green : Color.red;
             Render.DrawString(MENU_X + 10, MENU_Y + 60, $"Enemy Bones {bonesStatus}", bonesColor);
             
             // Instructions
@@ -59,7 +59,7 @@ namespace Modules
                 if (mousePos.x >= MENU_X + 10 && mousePos.x <= MENU_X + 150 &&
                     mousePos.y >= MENU_Y + 40 && mousePos.y <= MENU_Y + 55)
                 {
-                    Hacks.enemyESP = !Hacks.enemyESP;
+                    ESPSettings.ShowEnemyESP = !ESPSettings.ShowEnemyESP;
                     Event.current.Use();
                 }
                 
@@ -67,7 +67,7 @@ namespace Modules
                 if (mousePos.x >= MENU_X + 10 && mousePos.x <= MENU_X + 150 &&
                     mousePos.y >= MENU_Y + 60 && mousePos.y <= MENU_Y + 75)
                 {
-                    Hacks.enemyBones = !Hacks.enemyBones;
+                    ESPSettings.ShowEnemyBones = !ESPSettings.ShowEnemyBones;
                     Event.current.Use();
                 }
             }

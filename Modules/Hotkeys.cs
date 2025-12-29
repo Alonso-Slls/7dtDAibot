@@ -22,15 +22,15 @@ namespace Modules
             // Toggle Enemy ESP with F1 key
             if (Input.GetKeyDown(KeyCode.F1))
             {
-                Hacks.enemyESP = !Hacks.enemyESP;
-                Debug.Log($"Enemy ESP {(Hacks.enemyESP ? "enabled" : "disabled")}");
+                ESPSettings.ShowEnemyESP = !ESPSettings.ShowEnemyESP;
+                Debug.Log($"Enemy ESP {(ESPSettings.ShowEnemyESP ? "enabled" : "disabled")}");
             }
             
             // Toggle Enemy Bones with F2 key
             if (Input.GetKeyDown(KeyCode.F2))
             {
-                Hacks.enemyBones = !Hacks.enemyBones;
-                Debug.Log($"Enemy Bones {(Hacks.enemyBones ? "enabled" : "disabled")}");
+                ESPSettings.ShowEnemyBones = !ESPSettings.ShowEnemyBones;
+                Debug.Log($"Enemy Bones {(ESPSettings.ShowEnemyBones ? "enabled" : "disabled")}");
             }
             
             // Force update entities with F3 key

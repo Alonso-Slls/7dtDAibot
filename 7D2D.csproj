@@ -96,6 +96,7 @@
     <Compile Include="Modules\ESP.cs" />
     <Compile Include="Modules\UI.cs" />
     <Compile Include="Modules\Hotkeys.cs" />
+    <Compile Include="Modules\ESPSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   

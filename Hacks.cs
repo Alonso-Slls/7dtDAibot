@@ -5,8 +5,6 @@ public class Hacks : MonoBehaviour
 {
     // Global entity lists
     public static List<EntityEnemy> eEnemy = new List<EntityEnemy>();
-    public static List<EntityPlayer> ePlayers = new List<EntityPlayer>();
-    public static List<EntityItem> eItems = new List<EntityItem>();
     
     // Timing variables
     private float lastUpdateTime = 0f;
@@ -14,15 +12,12 @@ public class Hacks : MonoBehaviour
     
     // Game state
     public static bool isLoaded = false;
-    public static bool showMenu = false;
-    
-    // ESP settings
-    public static bool enemyESP = true;
-    public static bool enemyBones = true;
+    public static bool showMenu = true; // Start with menu visible for testing
     
     void Start()
     {
         Debug.Log("Hacks component initialized");
+        Modules.ESPSettings.LoadSettings();
     }
     
     void Update()
@@ -49,11 +44,11 @@ public class Hacks : MonoBehaviour
     {
         if (!isLoaded) return;
         
-        // Draw menu
-        Modules.UI.DrawMenu();
+        // Draw IMGUI menu
+        DrawIMGUI();
         
         // Draw ESP if enabled
-        if (enemyESP)
+        if (Modules.ESPSettings.ShowEnemyESP)
         {
             foreach (var enemy in eEnemy)
             {
@@ -65,16 +60,61 @@ public class Hacks : MonoBehaviour
         }
     }
     
+    private void DrawIMGUI()
+    {
+        if (!showMenu) 
+        {
+            Debug.Log("Menu hidden, skipping draw");
+            return;
+        }
+        
+        Debug.Log("Drawing IMGUI menu");
+        
+        // Get centered menu position
+        Vector2 pos = GetMenuPosition();
+        
+        // Begin an automatic layout area
+        GUILayout.BeginArea(new Rect(pos.x, pos.y, 200, 150));
+        
+        GUILayout.Label("7D2D ESP Menu", GUI.skin.box);
+        
+        // Draw toggles automatically with IMGUI
+        bool oldESP = Modules.ESPSettings.ShowEnemyESP;
+        bool oldBones = Modules.ESPSettings.ShowEnemyBones;
+        
+        Modules.ESPSettings.ShowEnemyESP = GUILayout.Toggle(Modules.ESPSettings.ShowEnemyESP, $"Enemy ESP {(Modules.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
+        Modules.ESPSettings.ShowEnemyBones = GUILayout.Toggle(Modules.ESPSettings.ShowEnemyBones, $"Enemy Bones {(Modules.ESPSettings.ShowEnemyBones ? "[ON]" : "[OFF]")}");
+        
+        // Save settings if they changed
+        if (oldESP != Modules.ESPSettings.ShowEnemyESP || oldBones != Modules.ESPSettings.ShowEnemyBones)
+        {
+            Modules.ESPSettings.SaveSettings();
+        }
+        
+        GUILayout.Space(10);
+        GUILayout.Label($"Enemies: {eEnemy.Count}", GUI.skin.label);
+        GUILayout.Label("Insert: Toggle Menu", GUI.skin.label);
+        GUILayout.Label("End: Unload", GUI.skin.label);
+        
+        GUILayout.EndArea();
+    }
+    
+    private static Vector2 GetMenuPosition()
+    {
+        return new Vector2(
+            (Screen.width - 200) / 2,
+            (Screen.height - 150) / 2
+        );
+    }
+    
     public static void updateObjects()
     {
         try
         {
             // Clear existing lists
             eEnemy.Clear();
-            ePlayers.Clear();
-            eItems.Clear();
             
-            // Find all enemies
+            // Find all enemies only (optimized for current ESP needs)
             var enemies = GameObject.FindObjectsOfType<EntityEnemy>();
             foreach (var enemy in enemies)
             {
@@ -84,27 +124,7 @@ public class Hacks : MonoBehaviour
                 }
             }
             
-            // Find all players
-            var players = GameObject.FindObjectsOfType<EntityPlayer>();
-            foreach (var player in players)
-            {
-                if (player != null && player.IsAlive())
-                {
-                    ePlayers.Add(player);
-                }
-            }
-            
-            // Find all items
-            var items = GameObject.FindObjectsOfType<EntityItem>();
-            foreach (var item in items)
-            {
-                if (item != null)
-                {
-                    eItems.Add(item);
-                }
-            }
-            
-            Debug.Log($"Updated entities: {eEnemy.Count} enemies, {ePlayers.Count} players, {eItems.Count} items");
+            Debug.Log($"Updated entities: {eEnemy.Count} enemies");
         }
         catch (System.Exception e)
         {

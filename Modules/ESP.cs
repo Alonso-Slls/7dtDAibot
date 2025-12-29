@@ -42,7 +42,7 @@ namespace Modules
             Render.DrawString(w2s_head.x, w2s_feet.y + 5, $"{distance:F1}m", Color.yellow);
             
             // Draw bones if enabled
-            if (Hacks.enemyBones)
+            if (ESPSettings.ShowEnemyBones)
             {
                 DrawBones(entity);
             }
