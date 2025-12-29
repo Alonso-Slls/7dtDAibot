@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 namespace Modules
 {
@@ -26,18 +27,17 @@ namespace Modules
                 Debug.Log($"Enemy ESP {(ESPSettings.ShowEnemyESP ? "enabled" : "disabled")}");
             }
             
-            // Toggle Enemy Bones with F2 key
-            if (Input.GetKeyDown(KeyCode.F2))
-            {
-                ESPSettings.ShowEnemyBones = !ESPSettings.ShowEnemyBones;
-                Debug.Log($"Enemy Bones {(ESPSettings.ShowEnemyBones ? "enabled" : "disabled")}");
-            }
-            
             // Force update entities with F3 key
             if (Input.GetKeyDown(KeyCode.F3))
             {
-                Hacks.updateObjects();
-                Debug.Log("Entity list force updated");
+                var hacksComponent = Object.FindObjectOfType<Hacks>();
+                if (hacksComponent != null)
+                {
+                    hacksComponent.StartCoroutine(hacksComponent.GetType().GetMethod("UpdateEntitiesCoroutine", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                        .Invoke(hacksComponent, null) as IEnumerator);
+                    Debug.Log("Entity list force updated via coroutine");
+                }
             }
             
             // Additional hotkeys can be added here
@@ -102,7 +102,6 @@ namespace Modules
             state += $"Insert: {Input.GetKey(KeyCode.Insert)}\n";
             state += $"End: {Input.GetKey(KeyCode.End)}\n";
             state += $"F1: {Input.GetKey(KeyCode.F1)}\n";
-            state += $"F2: {Input.GetKey(KeyCode.F2)}\n";
             state += $"F3: {Input.GetKey(KeyCode.F3)}\n";
             state += $"Mouse Left: {Input.GetMouseButton(0)}\n";
             state += $"Mouse Right: {Input.GetMouseButton(1)}\n";

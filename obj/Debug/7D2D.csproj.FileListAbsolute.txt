@@ -1,0 +1,6 @@
+D:\cosas\7\7Days2Die-ESP-Aimbot--Internal-\bin\Debug\Game_7D2D.dll
+D:\cosas\7\7Days2Die-ESP-Aimbot--Internal-\bin\Debug\Game_7D2D.pdb
+D:\cosas\7\7Days2Die-ESP-Aimbot--Internal-\obj\Debug\7D2D.csproj.AssemblyReference.cache
+D:\cosas\7\7Days2Die-ESP-Aimbot--Internal-\obj\Debug\7D2D.csproj.CoreCompileInputs.cache
+D:\cosas\7\7Days2Die-ESP-Aimbot--Internal-\obj\Debug\Game_7D2D.dll
+D:\cosas\7\7Days2Die-ESP-Aimbot--Internal-\obj\Debug\Game_7D2D.pdb
