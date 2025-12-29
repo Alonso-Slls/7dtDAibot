@@ -91,6 +91,10 @@
   
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="EnhancedESPManager.cs" />
+    <Compile Include="ESPConfiguration.cs" />
+    <Compile Include="PerformanceMonitor.cs" />
+    <Compile Include="RobustDebugger.cs" />
     <Compile Include="Hacks.cs" />
     <Compile Include="Render.cs" />
     <Compile Include="Modules\ESP.cs" />

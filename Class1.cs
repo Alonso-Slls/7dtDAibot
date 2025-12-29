@@ -6,16 +6,14 @@ namespace Game_7D2D
     {
         public static void init()
         {
-            // Create the main GameObject for our hack
-            GameObject hackObject = new GameObject("ESP_Hack");
+            Debug.Log("[7dtDAibot] Loading enhanced ESP framework...");
             
-            // Add the Hacks component which contains all the logic
-            hackObject.AddComponent<Hacks>();
+            // Create main manager with enhanced ESP
+            var go = new GameObject("EnhancedESPManager");
+            go.AddComponent<SevenDtDAibot.EnhancedESPManager>();
+            Object.DontDestroyOnLoad(go);
             
-            // Make sure the object persists between scene loads
-            UnityEngine.Object.DontDestroyOnLoad(hackObject);
-            
-            Debug.Log("7D2D ESP Hack Loaded Successfully");
+            Debug.Log("[7dtDAibot] Enhanced ESP framework loaded");
         }
     }
 }
