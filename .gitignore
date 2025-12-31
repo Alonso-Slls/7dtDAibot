@@ -1,0 +1,27 @@
+# Ignore log files
+logs/
+*.log
+logs/exported_logs/
+
+# Ignore build artifacts
+bin/
+obj/
+*.pdb
+*.dll
+
+# Ignore user-specific files
+*.user
+*.suo
+*.cache
+*.tmp
+
+# Ignore Visual Studio files
+.vs/
+*.csproj.user
+*.sln.docstates
+
+# Ignore Unity files
+[Ll]ibrary/
+[Tt]emp/
+[Ll]ogs/
+[Ou]utput/

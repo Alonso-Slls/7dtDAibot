@@ -25,7 +25,8 @@ namespace SevenDtDAibot
             {
                 if (initialized) return;
                 
-                string logDir = Path.Combine(Application.persistentDataPath, "7dtDAibot", "logs");
+                // Use project folder instead of AppData
+                string logDir = Path.Combine(Application.dataPath, "..", "logs");
                 if (!Directory.Exists(logDir))
                 {
                     Directory.CreateDirectory(logDir);
@@ -347,6 +348,13 @@ namespace SevenDtDAibot
         {
             if (!initialized) Initialize();
             return exportPath;
+        }
+        
+        // NEW: Get current log directory path
+        public static string GetLogDirectory()
+        {
+            if (!initialized) Initialize();
+            return Path.GetDirectoryName(logPath);
         }
         
         // NEW: Get recent logs from memory buffer
