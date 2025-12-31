@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class Hacks : MonoBehaviour
 {
+    // Canvas ESP Manager
+    private Modules.CanvasESPManager canvasESPManager;
+    
     // Global entity lists
     public static List<EntityEnemy> eEnemy = new List<EntityEnemy>();
     
@@ -26,9 +29,24 @@ public class Hacks : MonoBehaviour
         Debug.Log("Hacks component initialized");
         Modules.ESPSettings.LoadSettings();
         
+        // Initialize Canvas ESP Manager
+        InitializeCanvasESP();
+        
         // Initialize RobustDebugger for better logging
         SevenDtDAibot.RobustDebugger.Initialize();
         SevenDtDAibot.RobustDebugger.Log("[Hacks] Component started successfully");
+    }
+    
+    void InitializeCanvasESP()
+    {
+        // Create and initialize Canvas ESP Manager
+        GameObject canvasESPManagerObj = new GameObject("CanvasESPManager");
+        canvasESPManagerObj.transform.SetParent(transform);
+        canvasESPManager = canvasESPManagerObj.AddComponent<Modules.CanvasESPManager>();
+        
+        DontDestroyOnLoad(canvasESPManagerObj);
+        
+        SevenDtDAibot.RobustDebugger.Log("[Hacks] Canvas ESP Manager initialized");
     }
     
     void Update()
@@ -95,35 +113,25 @@ public class Hacks : MonoBehaviour
                 return;
             }
             
-            // Draw ESP if enabled and camera is available
-            if (Modules.ESPSettings.ShowEnemyESP)
+            // Draw ESP using Canvas system if enabled
+            if (SevenDtDAibot.ESPSettings.ShowEnemyESP && canvasESPManager != null)
             {
-                // Try multiple camera detection methods
-                Camera cam = Camera.main;
-                if (cam == null) cam = FindObjectOfType<Camera>();
-                
-                if (cam != null)
+                try
                 {
-                    int drawnCount = 0;
-                    foreach (var enemy in eEnemy)
-                    {
-                        if (enemy != null && enemy.IsAlive() && enemy.transform != null)
-                        {
-                            Modules.ESP.esp_drawBox(enemy, Color.red);
-                            drawnCount++;
-                        }
-                    }
+                    // Convert list to array for Canvas ESP Manager
+                    EntityEnemy[] enemyArray = eEnemy.ToArray();
+                    canvasESPManager.RenderESP(enemyArray);
                     
                     // Debug info
-                    if (drawnCount > 0)
+                    if (enemyArray.Length > 0)
                     {
-                        SevenDtDAibot.RobustDebugger.Log($"[Hacks] Drew ESP for {drawnCount} enemies");
+                        SevenDtDAibot.RobustDebugger.Log($"[Hacks] Rendered Canvas ESP for {enemyArray.Length} enemies");
                     }
                 }
-                else
+                catch (System.Exception ex)
                 {
-                    // Show camera error
-                    GUI.Label(new Rect(10, 30, 200, 20), "No camera found!");
+                    Debug.LogError($"[Hacks] Canvas ESP error: {ex.Message}");
+                    SevenDtDAibot.RobustDebugger.LogError($"[Hacks] Canvas ESP error: {ex.Message}");
                 }
             }
         }
@@ -160,20 +168,20 @@ public class Hacks : MonoBehaviour
         GUILayout.Space(5);
         
         // Draw toggles automatically with IMGUI
-        bool oldESP = Modules.ESPSettings.ShowEnemyESP;
-        float oldDistance = Modules.ESPSettings.MaxESPDistance;
+        bool oldESP = SevenDtDAibot.ESPSettings.ShowEnemyESP;
+        float oldDistance = SevenDtDAibot.ESPSettings.MaxESPDistance;
         
-        Modules.ESPSettings.ShowEnemyESP = GUILayout.Toggle(Modules.ESPSettings.ShowEnemyESP, 
-            $"Enemy ESP {(Modules.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
+        SevenDtDAibot.ESPSettings.ShowEnemyESP = GUILayout.Toggle(SevenDtDAibot.ESPSettings.ShowEnemyESP, 
+            $"Enemy ESP {(SevenDtDAibot.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
         
         // Render distance slider
-        GUILayout.Label($"Render Distance: {Modules.ESPSettings.MaxESPDistance:F0}m");
-        Modules.ESPSettings.MaxESPDistance = GUILayout.HorizontalSlider(Modules.ESPSettings.MaxESPDistance, 50f, 300f);
+        GUILayout.Label($"Render Distance: {SevenDtDAibot.ESPSettings.MaxESPDistance:F0}m");
+        SevenDtDAibot.ESPSettings.MaxESPDistance = GUILayout.HorizontalSlider(SevenDtDAibot.ESPSettings.MaxESPDistance, 50f, 300f);
         
         // Save settings if they changed
-        if (oldESP != Modules.ESPSettings.ShowEnemyESP || Mathf.Abs(oldDistance - Modules.ESPSettings.MaxESPDistance) > 0.1f)
+        if (oldESP != SevenDtDAibot.ESPSettings.ShowEnemyESP || Mathf.Abs(oldDistance - SevenDtDAibot.ESPSettings.MaxESPDistance) > 0.1f)
         {
-            Modules.ESPSettings.SaveSettings();
+            SevenDtDAibot.ESPSettings.SaveSettings();
         }
         
         GUILayout.Space(10);

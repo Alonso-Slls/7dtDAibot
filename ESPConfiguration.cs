@@ -219,4 +219,65 @@ namespace SevenDtDAibot
             return new Color(r, g, b, a);
         }
     }
+    
+    // Static settings class for easy access
+    public static class ESPSettings
+    {
+        private static ESPConfiguration config = new ESPConfiguration();
+        
+        public static bool ShowEnemyESP
+        {
+            get { return config.showEnemies; }
+            set { config.showEnemies = value; }
+        }
+        
+        public static float MaxESPDistance
+        {
+            get { return config.maxESPDistance; }
+            set { config.maxESPDistance = Mathf.Clamp(value, 50f, 500f); }
+        }
+        
+        public static bool ShowDistance
+        {
+            get { return config.showDistance; }
+            set { config.showDistance = value; }
+        }
+        
+        public static void LoadSettings()
+        {
+            try
+            {
+                string configPath = Path.Combine(Application.dataPath, "..", "logs", "esp_config.json");
+                if (File.Exists(configPath))
+                {
+                    string json = File.ReadAllText(configPath);
+                    config = JsonUtility.FromJson<ESPConfiguration>(json);
+                    RobustDebugger.Log("[ESPSettings] Configuration loaded successfully");
+                }
+                else
+                {
+                    RobustDebugger.Log("[ESPSettings] Using default configuration");
+                }
+            }
+            catch (Exception ex)
+            {
+                RobustDebugger.LogError($"[ESPSettings] Failed to load configuration: {ex.Message}");
+            }
+        }
+        
+        public static void SaveSettings()
+        {
+            try
+            {
+                string configPath = Path.Combine(Application.dataPath, "..", "logs", "esp_config.json");
+                string json = JsonUtility.ToJson(config, true);
+                File.WriteAllText(configPath, json);
+                RobustDebugger.Log("[ESPSettings] Configuration saved successfully");
+            }
+            catch (Exception ex)
+            {
+                RobustDebugger.LogError($"[ESPSettings] Failed to save configuration: {ex.Message}");
+            }
+        }
+    }
 }
