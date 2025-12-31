@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Hacks : MonoBehaviour
 {
@@ -24,15 +25,48 @@ public class Hacks : MonoBehaviour
     {
         Debug.Log("Hacks component initialized");
         Modules.ESPSettings.LoadSettings();
+        
+        // Initialize RobustDebugger for better logging
+        SevenDtDAibot.RobustDebugger.Initialize();
+        SevenDtDAibot.RobustDebugger.Log("[Hacks] Component started successfully");
     }
     
     void Update()
     {
-        // Check if game is loaded
-        if (!isLoaded && GameManager.Instance != null)
+        // Check if game is loaded using multiple methods
+        if (!isLoaded)
         {
-            isLoaded = true;
-            Debug.Log("Game detected - ESP ready");
+            bool gameDetected = false;
+            
+            // Primary check: GameManager.Instance
+            if (GameManager.Instance != null)
+            {
+                gameDetected = true;
+            }
+            // Fallback 1: Check if we're in a game scene
+            else if (SceneManager.GetActiveScene().name != null && 
+                   (SceneManager.GetActiveScene().name.Contains("Game") || 
+                    SceneManager.GetActiveScene().name.Contains("Scene")))
+            {
+                gameDetected = true;
+            }
+            // Fallback 2: Check for player existence
+            else if (GameObject.FindObjectOfType<EntityPlayer>() != null)
+            {
+                gameDetected = true;
+            }
+            // Fallback 3: Check for camera
+            else if (Camera.main != null)
+            {
+                gameDetected = true;
+            }
+            
+            if (gameDetected)
+            {
+                isLoaded = true;
+                Debug.Log("Game detected - ESP ready");
+                SevenDtDAibot.RobustDebugger.Log("[Hacks] Game state detected, ESP functionality enabled");
+            }
         }
         
         // Handle hotkeys
@@ -48,21 +82,58 @@ public class Hacks : MonoBehaviour
     
     void OnGUI()
     {
-        if (!isLoaded) return;
-        
-        // Draw IMGUI menu
-        DrawIMGUI();
-        
-        // Draw ESP if enabled
-        if (Modules.ESPSettings.ShowEnemyESP)
+        try
         {
-            foreach (var enemy in eEnemy)
+            // Always try to draw menu first (for testing)
+            DrawIMGUI();
+            
+            // Only draw ESP if game is loaded and enabled
+            if (!isLoaded)
             {
-                if (enemy != null && enemy.IsAlive())
+                // Show loading status
+                GUI.Label(new Rect(10, 10, 200, 20), "Waiting for game detection...");
+                return;
+            }
+            
+            // Draw ESP if enabled and camera is available
+            if (Modules.ESPSettings.ShowEnemyESP)
+            {
+                // Try multiple camera detection methods
+                Camera cam = Camera.main;
+                if (cam == null) cam = FindObjectOfType<Camera>();
+                
+                if (cam != null)
                 {
-                    Modules.ESP.esp_drawBox(enemy, Color.red);
+                    int drawnCount = 0;
+                    foreach (var enemy in eEnemy)
+                    {
+                        if (enemy != null && enemy.IsAlive() && enemy.transform != null)
+                        {
+                            Modules.ESP.esp_drawBox(enemy, Color.red);
+                            drawnCount++;
+                        }
+                    }
+                    
+                    // Debug info
+                    if (drawnCount > 0)
+                    {
+                        SevenDtDAibot.RobustDebugger.Log($"[Hacks] Drew ESP for {drawnCount} enemies");
+                    }
+                }
+                else
+                {
+                    // Show camera error
+                    GUI.Label(new Rect(10, 30, 200, 20), "No camera found!");
                 }
             }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Hacks] OnGUI error: {ex.Message}");
+            SevenDtDAibot.RobustDebugger.LogError($"[Hacks] OnGUI error: {ex.Message}");
+            
+            // Show error on screen
+            GUI.Label(new Rect(10, 50, 300, 40), $"ESP Error: {ex.Message}");
         }
     }
     
@@ -70,25 +141,30 @@ public class Hacks : MonoBehaviour
     {
         if (!showMenu) 
         {
-            Debug.Log("Menu hidden, skipping draw");
-            return;
+            return; // Silently return when menu is hidden
         }
-        
-        Debug.Log("Drawing IMGUI menu");
         
         // Get centered menu position
         Vector2 pos = GetMenuPosition();
         
         // Begin an automatic layout area
-        GUILayout.BeginArea(new Rect(pos.x, pos.y, 200, 180));
+        GUILayout.BeginArea(new Rect(pos.x, pos.y, 280, 350));
         
         GUILayout.Label("7D2D ESP Menu", GUI.skin.box);
+        
+        // Game status
+        GUI.color = isLoaded ? Color.white : Color.red;
+        GUILayout.Label($"Game Status: {(isLoaded ? "Loaded" : "Waiting")}");
+        GUI.color = Color.white;
+        
+        GUILayout.Space(5);
         
         // Draw toggles automatically with IMGUI
         bool oldESP = Modules.ESPSettings.ShowEnemyESP;
         float oldDistance = Modules.ESPSettings.MaxESPDistance;
         
-        Modules.ESPSettings.ShowEnemyESP = GUILayout.Toggle(Modules.ESPSettings.ShowEnemyESP, $"Enemy ESP {(Modules.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
+        Modules.ESPSettings.ShowEnemyESP = GUILayout.Toggle(Modules.ESPSettings.ShowEnemyESP, 
+            $"Enemy ESP {(Modules.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
         
         // Render distance slider
         GUILayout.Label($"Render Distance: {Modules.ESPSettings.MaxESPDistance:F0}m");
@@ -101,11 +177,55 @@ public class Hacks : MonoBehaviour
         }
         
         GUILayout.Space(10);
-        GUILayout.Label($"Enemies: {eEnemy.Count}", GUI.skin.label);
+        
+        // Status information
+        GUILayout.Label($"Enemies Found: {eEnemy.Count}", GUI.skin.label);
+        GUI.color = Camera.main != null ? Color.white : Color.red;
+        GUILayout.Label($"Camera: {(Camera.main != null ? "Available" : "Not Found")}");
+        GUI.color = Color.white;
         GUILayout.Label($"FPS: {(1.0f / Time.deltaTime):F0}", GUI.skin.label);
+        
+        GUILayout.Space(10);
+        
+        // Debug Log Export Section
+        GUILayout.Label("Debug Log Export:", GUI.skin.box);
+        
+        // Show export directory
+        string exportDir = SevenDtDAibot.RobustDebugger.GetExportDirectory();
+        GUILayout.Label($"Export Dir: {exportDir}", GUI.skin.label);
+        
+        // Export buttons
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Export Logs (F4)"))
+        {
+            Modules.Hotkeys.ExportDebugLogs("manual_menu");
+        }
+        if (GUILayout.Button("Custom Export (F5)"))
+        {
+            Modules.Hotkeys.ExportDebugLogs("custom_menu");
+        }
+        GUILayout.EndHorizontal();
+        
+        // Show recent log entries
+        GUILayout.Space(5);
+        GUILayout.Label("Recent Logs:", GUI.skin.label);
+        string[] recentLogs = SevenDtDAibot.RobustDebugger.GetRecentLogs(3);
+        foreach (string log in recentLogs)
+        {
+            // Truncate long logs for display
+            string displayLog = log.Length > 50 ? log.Substring(0, 47) + "..." : log;
+            GUILayout.Label($"  {displayLog}", GUI.skin.label);
+        }
+        
+        GUILayout.Space(10);
+        
+        // Controls
+        GUILayout.Label("Controls:", GUI.skin.box);
         GUILayout.Label("Insert: Toggle Menu", GUI.skin.label);
         GUILayout.Label("F1: Toggle ESP", GUI.skin.label);
         GUILayout.Label("F3: Force Update", GUI.skin.label);
+        GUILayout.Label("F4: Export Logs", GUI.skin.label);
+        GUILayout.Label("F5: Custom Export", GUI.skin.label);
         GUILayout.Label("End: Unload", GUI.skin.label);
         
         GUILayout.EndArea();
@@ -181,12 +301,23 @@ public class Hacks : MonoBehaviour
     
     void OnDestroy()
     {
-        // Stop any running coroutines
-        if (entityUpdateCoroutine != null)
+        try
         {
-            StopCoroutine(entityUpdateCoroutine);
+            // Stop any running coroutines
+            if (entityUpdateCoroutine != null)
+            {
+                StopCoroutine(entityUpdateCoroutine);
+            }
+            
+            // Export logs automatically when component is destroyed
+            SevenDtDAibot.RobustDebugger.Log("[Hacks] Component being destroyed - exporting logs...");
+            SevenDtDAibot.RobustDebugger.CleanupAndExport();
+            
+            Debug.Log("Hacks component destroyed with log export");
         }
-        
-        Debug.Log("Hacks component destroyed");
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Hacks] Error during cleanup: {ex.Message}");
+        }
     }
 }

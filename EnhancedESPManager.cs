@@ -15,12 +15,19 @@ namespace SevenDtDAibot
         private bool showMenu = false;
         private bool espEnabled = true;
         private float lastEntityScan = 0f;
-        private Rect menuRect = new Rect(10, 10, 300, 400);
+        private Rect menuRect = new Rect(10, 10, 250, 300);
         private Vector2 scrollPosition = Vector2.zero;
+        
+        // Performance optimization settings
+        private const int MAX_ENTITIES = 50; // Limit cached entities
+        private const float SCAN_INTERVAL = 0.2f; // Scan every 200ms
+        private const float CACHE_DURATION = 1.0f; // Cache entities for 1 second
+        private float lastCacheUpdate = 0f;
         
         // Reusable objects to reduce GC pressure
         private Rect tempRect = new Rect();
         private GUIContent tempContent = new GUIContent();
+        private Vector3[] screenPoints = new Vector3[8]; // Reusable array for box calculations
 
         void Awake()
         {
@@ -59,21 +66,30 @@ namespace SevenDtDAibot
                     RobustDebugger.Log($"[EnhancedESP] ESP {(espEnabled ? "enabled" : "disabled")}");
                 }
                 
-                // Find camera if not found
+                // Find camera if not found (optimized)
                 if (mainCamera == null)
                 {
                     mainCamera = Camera.main;
                     if (mainCamera == null)
                     {
+                        // Only search for camera if main is null (performance optimization)
                         mainCamera = FindObjectOfType<Camera>();
                     }
                 }
                 
-                // Scan entities at configured interval
-                if (Time.time - lastEntityScan >= config.entityScanInterval)
+                // Optimized entity scanning with adaptive interval
+                float currentInterval = cachedEntities.Count > 20 ? SCAN_INTERVAL * 2 : SCAN_INTERVAL;
+                if (Time.time - lastEntityScan >= currentInterval)
                 {
                     ScanAndCacheEntities();
                     lastEntityScan = Time.time;
+                }
+                
+                // Clean cache periodically to prevent memory buildup
+                if (Time.time - lastCacheUpdate > CACHE_DURATION)
+                {
+                    CleanEntityCache();
+                    lastCacheUpdate = Time.time;
                 }
             }
             catch (Exception ex)
@@ -86,18 +102,25 @@ namespace SevenDtDAibot
         {
             try
             {
+                // Early null checks to prevent exceptions
+                if (config == null)
+                {
+                    RobustDebugger.LogError("[EnhancedESP] Config is null in OnGUI");
+                    return;
+                }
+                
                 if (espEnabled && mainCamera != null)
                 {
                     RenderAllESP();
                 }
                 
-                if (showMenu)
+                if (showMenu && config != null)
                 {
                     RenderMenu();
                 }
                 
-                // Performance overlay
-                if (config.showPerformanceInfo)
+                // Performance overlay - additional null check
+                if (config.showPerformanceInfo && performanceMonitor != null)
                 {
                     RenderPerformanceOverlay();
                 }
@@ -112,41 +135,110 @@ namespace SevenDtDAibot
         {
             try
             {
-                cachedEntities.Clear();
+                // Clear cache if it's been too long or too many entities
+                if (Time.time - lastCacheUpdate > CACHE_DURATION * 2 || cachedEntities.Count > MAX_ENTITIES)
+                {
+                    cachedEntities.Clear();
+                }
+                
+                if (mainCamera == null) return;
+                
                 Vector3 cameraPos = mainCamera.transform.position;
                 
-                // Scan enemies
+                // OPTIMIZED: Scan enemies only (no players, animals, or items)
                 if (config.showEnemies)
                 {
-                    ScanEntityType<EntityEnemy>(cameraPos, config.GetEnemyColor(), "Enemy");
+                    ScanEnemiesOptimized(cameraPos);
                 }
                 
-                // Scan players
-                if (config.showPlayers)
+                if (config.enableVerboseLogging && cachedEntities.Count > 0)
                 {
-                    ScanEntityType<EntityPlayer>(cameraPos, config.GetPlayerColor(), "Player");
-                }
-                
-                // Scan animals
-                if (config.showAnimals)
-                {
-                    ScanEntityType<EntityAnimal>(cameraPos, config.GetAnimalColor(), "Animal");
-                }
-                
-                // Scan items
-                if (config.showItems)
-                {
-                    ScanEntityType<EntityItem>(cameraPos, config.GetItemColor(), "Item");
-                }
-                
-                if (config.enableVerboseLogging)
-                {
-                    RobustDebugger.Log($"[EnhancedESP] Scanned {cachedEntities.Count} entities");
+                    RobustDebugger.Log($"[EnhancedESP] Scanned {cachedEntities.Count} enemies");
                 }
             }
             catch (Exception ex)
             {
                 RobustDebugger.LogError("[EnhancedESP] Entity scanning error: " + ex.Message);
+            }
+        }
+
+        private void ScanEnemiesOptimized(Vector3 cameraPos)
+        {
+            try
+            {
+                // Use FindObjectsOfType for better performance than manual iteration
+                EntityEnemy[] allEnemies = FindObjectsOfType<EntityEnemy>();
+                
+                // Pre-allocate list to avoid resizing
+                if (cachedEntities.Capacity < MAX_ENTITIES)
+                {
+                    cachedEntities.Capacity = MAX_ENTITIES;
+                }
+                
+                int processedCount = 0;
+                Color enemyColor = config.GetEnemyColor();
+                
+                foreach (EntityEnemy enemy in allEnemies)
+                {
+                    // Skip null or dead enemies early
+                    if (enemy == null || !enemy.IsAlive() || enemy.transform == null)
+                        continue;
+                    
+                    // Distance culling before any calculations
+                    Vector3 enemyPos = enemy.transform.position;
+                    float distance = Vector3.Distance(cameraPos, enemyPos);
+                    
+                    if (distance > config.maxESPDistance)
+                        continue;
+                    
+                    // Limit entities for performance
+                    if (processedCount >= MAX_ENTITIES)
+                        break;
+                    
+                    // Add to cache
+                    cachedEntities.Add(new CachedEntity
+                    {
+                        entity = enemy,
+                        position = enemyPos,
+                        distance = distance,
+                        color = enemyColor,
+                        typeName = "Enemy",
+                        health = 100,
+                        maxHealth = 100,
+                        lastUpdate = Time.time
+                    });
+                    
+                    processedCount++;
+                }
+            }
+            catch (Exception ex)
+            {
+                RobustDebugger.LogError("[EnhancedESP] Optimized enemy scanning error: " + ex.Message);
+            }
+        }
+        
+        private void CleanEntityCache()
+        {
+            try
+            {
+                // Remove dead or null entities
+                cachedEntities.RemoveAll(entity => 
+                    entity.entity == null || 
+                    (entity.entity is EntityEnemy enemy && !enemy.IsAlive()) ||
+                    Time.time - entity.lastUpdate > CACHE_DURATION * 2);
+                
+                // Sort by distance for consistent rendering
+                cachedEntities.Sort((a, b) => a.distance.CompareTo(b.distance));
+                
+                // Limit cache size
+                if (cachedEntities.Count > MAX_ENTITIES)
+                {
+                    cachedEntities.RemoveRange(MAX_ENTITIES, cachedEntities.Count - MAX_ENTITIES);
+                }
+            }
+            catch (Exception ex)
+            {
+                RobustDebugger.LogError("[EnhancedESP] Cache cleaning error: " + ex.Message);
             }
         }
 
@@ -191,60 +283,87 @@ namespace SevenDtDAibot
         {
             try
             {
+                if (cachedEntities.Count == 0) return;
+                
+                // Pre-calculate common values
+                Vector3 cameraPos = mainCamera.transform.position;
+                float screenWidth = Screen.width;
+                float screenHeight = Screen.height;
+                float maxDistance = config.maxESPDistance;
+                
                 foreach (CachedEntity cached in cachedEntities)
                 {
                     if (cached.entity == null) continue;
                     
+                    // Quick distance check
+                    if (cached.distance > maxDistance) continue;
+                    
+                    // Convert to screen coordinates
                     Vector3 screenPos = mainCamera.WorldToScreenPoint(cached.position);
                     
                     // Skip if behind camera
                     if (screenPos.z < 0) continue;
                     
-                    screenPos.y = Screen.height - screenPos.y;
+                    // Convert to GUI coordinates
+                    screenPos.y = screenHeight - screenPos.y;
                     
                     // Calculate opacity based on distance
-                    float opacity = Mathf.Lerp(1.0f, 0.3f, cached.distance / config.maxESPDistance);
+                    float opacity = Mathf.Lerp(1.0f, 0.3f, cached.distance / maxDistance);
                     Color espColor = new Color(cached.color.r, cached.color.g, cached.color.b, cached.color.a * opacity);
                     
-                    // Draw ESP box
-                    DrawESPBox(screenPos, cached, espColor);
+                    // OPTIMIZED: Only draw essential ESP features
+                    DrawOptimizedESPBox(screenPos, cached, espColor);
                     
-                    // Draw additional features
-                    if (config.showHealthBars)
-                    {
-                        DrawHealthBar(screenPos, cached);
-                    }
-                    
-                    if (config.showSnaplines)
-                    {
-                        DrawSnapline(screenPos, espColor);
-                    }
-                    
+                    // Only draw distance if enabled (minimal overhead)
                     if (config.showDistance)
                     {
-                        DrawDistanceText(screenPos, cached.distance, espColor);
+                        DrawOptimizedDistanceText(screenPos, cached.distance, espColor);
                     }
-                    
-                    if (config.showHealthText)
-                    {
-                        DrawHealthText(screenPos, cached, espColor);
-                    }
-                }
-                
-                // Draw global overlays
-                if (config.showFOVCircle)
-                {
-                    DrawFOVCircle();
-                }
-                
-                if (config.showCrosshair)
-                {
-                    DrawCrosshair();
                 }
             }
             catch (Exception ex)
             {
                 RobustDebugger.LogError("[EnhancedESP] ESP rendering error: " + ex.Message);
+            }
+        }
+
+        private void DrawOptimizedESPBox(Vector3 screenPos, CachedEntity cached, Color color)
+        {
+            try
+            {
+                float distance = cached.distance;
+                float boxSize = Mathf.Max(config.minBoxSize, (config.boxSizeMultiplier / distance));
+                
+                // Calculate box bounds
+                float x = screenPos.x - boxSize / 2;
+                float y = screenPos.y - boxSize / 2;
+                
+                // OPTIMIZED: Simple box outline only (no corners for performance)
+                Render.DrawBox(x, y, boxSize, boxSize, color, false);
+                
+                // OPTIMIZED: Simple name only (no complex calculations)
+                GUI.color = color;
+                GUI.Label(new Rect(x, y - 20, 100, 20), cached.typeName);
+                GUI.color = Color.white;
+            }
+            catch (Exception ex)
+            {
+                RobustDebugger.LogError("[EnhancedESP] Optimized box drawing error: " + ex.Message);
+            }
+        }
+        
+        private void DrawOptimizedDistanceText(Vector3 screenPos, float distance, Color color)
+        {
+            try
+            {
+                string distanceText = $"{distance:F0}m";
+                GUI.color = color;
+                GUI.Label(new Rect(screenPos.x - 30, screenPos.y + 20, 60, 20), distanceText);
+                GUI.color = Color.white;
+            }
+            catch (Exception ex)
+            {
+                RobustDebugger.LogError("[EnhancedESP] Optimized distance text error: " + ex.Message);
             }
         }
 
@@ -435,7 +554,7 @@ namespace SevenDtDAibot
         {
             try
             {
-                GUI.Box(menuRect, "Enhanced ESP Menu v2.0");
+                GUI.Box(menuRect, "Optimized ESP Menu");
                 
                 GUILayout.BeginArea(new Rect(menuRect.x + 10, menuRect.y + 30, menuRect.width - 20, menuRect.height - 40));
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition);
@@ -446,35 +565,25 @@ namespace SevenDtDAibot
                 GUILayout.EndHorizontal();
                 GUILayout.Space(10);
                 
-                // ESP Features
+                // OPTIMIZED: Enemy-only toggle
                 GUILayout.Label("ESP Features", GUI.skin.box);
-                config.showEnemies = GUILayout.Toggle(config.showEnemies, "Show Enemies");
-                config.showPlayers = GUILayout.Toggle(config.showPlayers, "Show Players");
-                config.showAnimals = GUILayout.Toggle(config.showAnimals, "Show Animals");
-                config.showItems = GUILayout.Toggle(config.showItems, "Show Items");
+                config.showEnemies = GUILayout.Toggle(config.showEnemies, "Show Enemies Only");
                 GUILayout.Space(10);
                 
-                // Visual Options
+                // OPTIMIZED: Essential visual options only
                 GUILayout.Label("Visual Options", GUI.skin.box);
-                config.showHealthBars = GUILayout.Toggle(config.showHealthBars, "Health Bars");
-                config.showSnaplines = GUILayout.Toggle(config.showSnaplines, "Snaplines");
                 config.showDistance = GUILayout.Toggle(config.showDistance, "Distance Display");
-                config.showHealthText = GUILayout.Toggle(config.showHealthText, "Health Text");
-                config.showFOVCircle = GUILayout.Toggle(config.showFOVCircle, "FOV Circle");
-                config.showCrosshair = GUILayout.Toggle(config.showCrosshair, "Crosshair");
-                config.showCornerIndicators = GUILayout.Toggle(config.showCornerIndicators, "Corner Indicators");
                 GUILayout.Space(10);
                 
                 // Distance slider
                 GUILayout.Label($"Max ESP Distance: {config.maxESPDistance:F0}m");
-                config.maxESPDistance = GUILayout.HorizontalSlider(config.maxESPDistance, 50f, 500f);
+                config.maxESPDistance = GUILayout.HorizontalSlider(config.maxESPDistance, 50f, 300f);
                 GUILayout.Space(10);
                 
-                // Performance info
+                // OPTIMIZED: Essential performance info only
                 GUILayout.Label("Performance Info", GUI.skin.box);
                 GUILayout.Label($"FPS: {performanceMonitor.CurrentFPS:F0}");
-                GUILayout.Label($"Frame Time: {performanceMonitor.FrameTime:F2}ms");
-                GUILayout.Label($"Entities: {cachedEntities.Count}");
+                GUILayout.Label($"Entities: {cachedEntities.Count}/{MAX_ENTITIES}");
                 GUILayout.Label($"Camera: {(mainCamera != null ? "Active" : "None")}");
                 GUILayout.Space(10);
                 
@@ -546,5 +655,6 @@ namespace SevenDtDAibot
         public string typeName;
         public int health;
         public int maxHealth;
+        public float lastUpdate; // For cache management
     }
 }

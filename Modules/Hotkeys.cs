@@ -40,8 +40,50 @@ namespace Modules
                 }
             }
             
+            // NEW: Export debug logs with F4 key
+            if (Input.GetKeyDown(KeyCode.F4))
+            {
+                ExportDebugLogs();
+            }
+            
+            // NEW: Export debug logs with custom name using F5 key
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                ExportDebugLogs("manual_custom");
+            }
+            
             // Additional hotkeys can be added here
             // Example: Toggle different ESP features, change colors, etc.
+        }
+        
+        public static void ExportDebugLogs(string suffix = "manual")
+        {
+            try
+            {
+                Debug.Log($"[Hotkeys] Starting debug log export ({suffix})...");
+                
+                bool success = SevenDtDAibot.RobustDebugger.ExportLogs(suffix);
+                
+                if (success)
+                {
+                    string exportDir = SevenDtDAibot.RobustDebugger.GetExportDirectory();
+                    Debug.Log($"[Hotkeys] Debug logs exported successfully to: {exportDir}");
+                    
+                    // Show on-screen notification if menu is visible
+                    if (Hacks.showMenu)
+                    {
+                        // This will be visible next frame in the menu
+                    }
+                }
+                else
+                {
+                    Debug.LogError("[Hotkeys] Debug log export failed");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[Hotkeys] Error exporting debug logs: {e.Message}");
+            }
         }
         
         private static void UnloadHack()
@@ -49,6 +91,9 @@ namespace Modules
             try
             {
                 Debug.Log("Unloading 7D2D ESP Hack...");
+                
+                // Export logs before unloading
+                SevenDtDAibot.RobustDebugger.CleanupAndExport();
                 
                 // Find and destroy the hack GameObject
                 GameObject hackObject = GameObject.Find("ESP_Hack");
@@ -103,6 +148,8 @@ namespace Modules
             state += $"End: {Input.GetKey(KeyCode.End)}\n";
             state += $"F1: {Input.GetKey(KeyCode.F1)}\n";
             state += $"F3: {Input.GetKey(KeyCode.F3)}\n";
+            state += $"F4: {Input.GetKey(KeyCode.F4)} (Export Logs)\n";
+            state += $"F5: {Input.GetKey(KeyCode.F5)} (Custom Export)\n";
             state += $"Mouse Left: {Input.GetMouseButton(0)}\n";
             state += $"Mouse Right: {Input.GetMouseButton(1)}\n";
             

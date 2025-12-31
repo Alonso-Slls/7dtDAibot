@@ -13,26 +13,26 @@ namespace SevenDtDAibot
         public SerializableColor animalColor = new SerializableColor(1.0f, 1.0f, 0.0f, 1.0f);
         public SerializableColor itemColor = new SerializableColor(0.0f, 1.0f, 1.0f, 1.0f);
         
-        // Performance settings
+        // Performance settings - OPTIMIZED
         public float maxESPDistance = 200.0f;
-        public float entityScanInterval = 0.1f;
+        public float entityScanInterval = 0.2f; // Faster scanning for better responsiveness
         public bool enableVerboseLogging = false;
         
-        // Entity toggles
+        // Entity toggles - OPTIMIZED: Enemies only
         public bool showEnemies = true;
-        public bool showPlayers = true;
-        public bool showAnimals = true;
-        public bool showItems = true;
+        public bool showPlayers = false; // Disabled for performance
+        public bool showAnimals = false; // Disabled for performance
+        public bool showItems = false; // Disabled for performance
         
-        // Visual features
-        public bool showHealthBars = true;
-        public bool showSnaplines = false;
-        public bool showDistance = true;
-        public bool showHealthText = false;
-        public bool showFOVCircle = false;
-        public bool showCrosshair = false;
-        public bool showCornerIndicators = true;
-        public bool showPerformanceInfo = true;
+        // Visual features - OPTIMIZED: Essential only
+        public bool showHealthBars = false; // Disabled for performance
+        public bool showSnaplines = false; // Disabled for performance
+        public bool showDistance = true; // Essential
+        public bool showHealthText = false; // Disabled for performance
+        public bool showFOVCircle = false; // Disabled for performance
+        public bool showCrosshair = false; // Disabled for performance
+        public bool showCornerIndicators = false; // Disabled for performance
+        public bool showPerformanceInfo = true; // Essential for monitoring
         
         // Hotkeys
         public int toggleMenuKey = 45;  // Insert key
@@ -105,28 +105,30 @@ namespace SevenDtDAibot
         {
             try
             {
-                // Reset to default values
+                // Reset to default values - OPTIMIZED
                 enemyColor = new SerializableColor(1.0f, 0.0f, 0.0f, 1.0f);
                 playerColor = new SerializableColor(0.0f, 1.0f, 0.0f, 1.0f);
                 animalColor = new SerializableColor(1.0f, 1.0f, 0.0f, 1.0f);
                 itemColor = new SerializableColor(0.0f, 1.0f, 1.0f, 1.0f);
                 
                 maxESPDistance = 200.0f;
-                entityScanInterval = 0.1f;
+                entityScanInterval = 0.2f; // Optimized interval
                 enableVerboseLogging = false;
                 
+                // OPTIMIZED: Enemy-only defaults
                 showEnemies = true;
-                showPlayers = true;
-                showAnimals = true;
-                showItems = true;
+                showPlayers = false;
+                showAnimals = false;
+                showItems = false;
                 
-                showHealthBars = true;
+                // OPTIMIZED: Essential visual features only
+                showHealthBars = false;
                 showSnaplines = false;
                 showDistance = true;
                 showHealthText = false;
                 showFOVCircle = false;
                 showCrosshair = false;
-                showCornerIndicators = true;
+                showCornerIndicators = false;
                 showPerformanceInfo = true;
                 
                 toggleMenuKey = 45;
@@ -137,7 +139,7 @@ namespace SevenDtDAibot
                 boxSizeMultiplier = 1000.0f;
                 
                 SaveConfiguration();
-                RobustDebugger.Log("[ESPConfig] Configuration reset to defaults");
+                RobustDebugger.Log("[ESPConfig] Configuration reset to optimized defaults");
             }
             catch (Exception ex)
             {

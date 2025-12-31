@@ -27,8 +27,18 @@ namespace Modules
         {
             if (entity == null || !entity.IsAlive()) return;
             
+            // Check if camera is available with fallback methods
+            Camera cam = Camera.main;
+            if (cam == null) cam = Camera.current;
+            if (cam == null) cam = Object.FindObjectOfType<Camera>();
+            
+            if (cam == null) return;
+            
             // Get entity configuration based on type
             EntityConfig config = GetEntityConfig(entity);
+            
+            // Check entity transform
+            if (entity.transform == null) return;
             
             // Get entity position
             Vector3 entityPos = entity.transform.position;
@@ -38,14 +48,14 @@ namespace Modules
             Vector3 feetPos = entityPos;
             
             // Convert to screen coordinates
-            Vector3 w2s_head = Camera.main.WorldToScreenPoint(headPos);
-            Vector3 w2s_feet = Camera.main.WorldToScreenPoint(feetPos);
+            Vector3 w2s_head = cam.WorldToScreenPoint(headPos);
+            Vector3 w2s_feet = cam.WorldToScreenPoint(feetPos);
             
             // Enhanced visibility checks
             if (!IsVisibleOnScreen(w2s_head) || !IsVisibleOnScreen(w2s_feet)) return;
             
             // Check distance
-            float distance = Vector3.Distance(Camera.main.transform.position, entityPos);
+            float distance = Vector3.Distance(cam.transform.position, entityPos);
             if (distance > ESPSettings.MaxESPDistance) return;
             
             // Convert to GUI coordinates

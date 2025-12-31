@@ -6,14 +6,14 @@ namespace Game_7D2D
     {
         public static void init()
         {
-            Debug.Log("[7dtDAibot] Loading enhanced ESP framework...");
+            Debug.Log("[7dtDAibot] Loading ESP framework...");
             
-            // Create main manager with enhanced ESP
-            var go = new GameObject("EnhancedESPManager");
-            go.AddComponent<SevenDtDAibot.EnhancedESPManager>();
+            // Create main GameObject with Hacks component (the working system)
+            var go = new GameObject("ESP_Hack");
+            go.AddComponent<Hacks>();
             Object.DontDestroyOnLoad(go);
             
-            Debug.Log("[7dtDAibot] Enhanced ESP framework loaded");
+            Debug.Log("[7dtDAibot] ESP framework loaded successfully");
         }
     }
 }
