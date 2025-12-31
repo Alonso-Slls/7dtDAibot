@@ -77,7 +77,7 @@ namespace Modules
         
         private static EntityConfig GetEntityConfig(EntityEnemy entity)
         {
-            string entityName = entity.name.ToLower();
+            string entityName = entity.EntityName.ToLower();
             
             foreach (var kvp in ENTITY_CONFIGS)
             {
@@ -118,7 +118,7 @@ namespace Modules
         private static void DrawEntityInfo(Vector2 screenHead, Vector2 screenFeet, EntityEnemy entity, float distance)
         {
             // Entity name above box - center it properly
-            string entityName = entity.name;
+            string entityName = entity.EntityName;
             Vector2 nameSize = Render.GetStringSize(entityName);
             Render.DrawString(screenHead.x - nameSize.x / 2, screenHead.y - 20, entityName, Color.white);
             
