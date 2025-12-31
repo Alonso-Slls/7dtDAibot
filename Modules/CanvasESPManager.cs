@@ -69,18 +69,24 @@ namespace Modules
                 espCanvas.sortingOrder = 1000; // Render on top
                 RobustDebugger.Log("[CanvasESP] Canvas created with ScreenSpaceOverlay mode");
                 
+                // Set canvas to match OnGUI coordinate system (top-left origin)
+                RectTransform canvasRect = canvasObj.GetComponent<RectTransform>();
+                canvasRect.anchorMin = Vector2.zero;
+                canvasRect.anchorMax = Vector2.one;
+                canvasRect.sizeDelta = Vector2.zero;
+                canvasRect.anchoredPosition = Vector2.zero;
+                
                 // Add CanvasScaler for resolution independence
                 CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920, 1080);
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                scaler.matchWidthOrHeight = 0.5f;
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+                scaler.scaleFactor = 1f;
+                scaler.referencePixelsPerUnit = 100;
                 
                 // Add GraphicRaycaster for UI interaction
                 canvasObj.AddComponent<GraphicRaycaster>();
                 
                 DontDestroyOnLoad(canvasObj);
-                RobustDebugger.Log("[CanvasESP] Canvas setup completed");
+                RobustDebugger.Log("[CanvasESP] Canvas setup completed with OnGUI-compatible coordinates");
             }
             
             // Create prefabs if not assigned
@@ -236,11 +242,8 @@ namespace Modules
         
         void CacheCamera()
         {
+            // Use Camera.main directly like the old ESP code
             mainCamera = Camera.main;
-            if (mainCamera == null)
-            {
-                mainCamera = FindObjectOfType<Camera>();
-            }
             
             if (mainCamera != null)
             {
@@ -248,7 +251,7 @@ namespace Modules
             }
             else
             {
-                RobustDebugger.LogWarning("[CanvasESP] No camera found - ESP will not function");
+                RobustDebugger.LogWarning("[CanvasESP] Camera.main not found - ESP will not function");
             }
         }
         
@@ -294,29 +297,28 @@ namespace Modules
             
             ESPElements elements = activeESPElements[entity];
             
-            // Calculate screen positions
-            Vector3 entityPos = entity.transform.position;
-            EntityConfig config = GetEntityConfig(entity);
+            // Calculate screen positions using the same method as old ESP
+            Vector3 entity_head = entity.transform.position;
+            Vector3 entity_feet = new Vector3(entity_head.x, entity_head.y + entity.height, entity_head.z);
             
-            Vector3 headPos = entityPos + Vector3.up * config.headOffset;
-            Vector3 feetPos = entityPos;
-            
-            Vector3 w2s_head = mainCamera.WorldToScreenPoint(headPos);
-            Vector3 w2s_feet = mainCamera.WorldToScreenPoint(feetPos);
+            Vector3 w2s_head = mainCamera.WorldToScreenPoint(entity_head);
+            Vector3 w2s_feet = mainCamera.WorldToScreenPoint(entity_feet);
             
             RobustDebugger.Log($"[CanvasESP] Entity {entity.EntityName} - Head: {w2s_head}, Feet: {w2s_feet}");
             
-            // Visibility checks
-            if (!IsVisibleOnScreen(w2s_head) || !IsVisibleOnScreen(w2s_feet))
+            // Distance calculation using local player
+            float distance = Vector3.Distance(entity.transform.position, GetLocalPlayerPosition());
+            
+            // Visibility checks using old ESP method
+            if (w2s_head.z <= 0f || w2s_head.x <= 0 || w2s_head.x >= Screen.width || w2s_head.y <= 0)
             {
                 RobustDebugger.Log($"[CanvasESP] Entity {entity.EntityName} not visible on screen");
                 ReturnElementsToPool(elements);
                 return;
             }
             
-            // Distance check
-            float distance = Vector3.Distance(mainCamera.transform.position, entityPos);
-            if (distance > SevenDtDAibot.ESPSettings.MaxESPDistance)
+            // Distance check using old ESP limit (100f)
+            if (distance > 100f)
             {
                 RobustDebugger.Log($"[CanvasESP] Entity {entity.EntityName} too far: {distance}m");
                 ReturnElementsToPool(elements);
@@ -331,7 +333,7 @@ namespace Modules
             
             // Calculate box dimensions
             float boxHeight = Mathf.Abs(screenFeet.y - screenHead.y);
-            float boxWidth = CalculateBoxWidth(boxHeight, distance, config);
+            float boxWidth = CalculateBoxWidth(boxHeight, distance, GetEntityConfig(entity));
             
             RobustDebugger.Log($"[CanvasESP] Box dimensions - Width: {boxWidth}, Height: {boxHeight}");
             
@@ -503,16 +505,34 @@ namespace Modules
         }
         
         // Helper methods
+        Vector3 GetLocalPlayerPosition()
+        {
+            // Try to find local player like the old ESP code
+            EntityPlayer localPlayer = FindObjectOfType<EntityPlayer>();
+            if (localPlayer != null)
+            {
+                return localPlayer.transform.position;
+            }
+            
+            // Fallback to camera position
+            if (mainCamera != null)
+            {
+                return mainCamera.transform.position;
+            }
+            
+            return Vector3.zero;
+        }
+        
         Vector2 WorldToCanvasPoint(Vector3 worldToScreenPoint)
         {
-            // Convert from Unity screen coordinates to canvas coordinates
-            // Unity screen: (0,0) = bottom-left, Canvas: (0,0) = center
-            float canvasX = worldToScreenPoint.x - (Screen.width / 2f);
-            float canvasY = worldToScreenPoint.y - (Screen.height / 2f);
+            // Use old ESP coordinate system directly for now
+            // Old ESP used: new Vector2(w2s_head.x, (float)Screen.height - w2s_head.y)
+            float oldX = worldToScreenPoint.x;
+            float oldY = Screen.height - worldToScreenPoint.y;
             
-            RobustDebugger.Log($"[CanvasESP] Coordinate conversion: Screen({worldToScreenPoint.x}, {worldToScreenPoint.y}) -> Canvas({canvasX}, {canvasY})");
+            RobustDebugger.Log($"[CanvasESP] Using old ESP coords: Screen({worldToScreenPoint.x}, {worldToScreenPoint.y}) -> Old({oldX}, {oldY})");
             
-            return new Vector2(canvasX, canvasY);
+            return new Vector2(oldX, oldY);
         }
         
         bool IsVisibleOnScreen(Vector3 worldToScreenPoint)

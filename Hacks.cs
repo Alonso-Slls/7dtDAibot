@@ -27,13 +27,17 @@ public class Hacks : MonoBehaviour
     void Start()
     {
         Debug.Log("Hacks component initialized");
-        SevenDtDAibot.ESPSettings.LoadSettings();
         
-        // Initialize Canvas ESP Manager
+        // Initialize RobustDebugger FIRST before anything that uses it
+        SevenDtDAibot.RobustDebugger.Initialize();
+        SevenDtDAibot.RobustDebugger.Log("[Hacks] RobustDebugger initialized");
+        
+        SevenDtDAibot.ESPSettings.LoadSettings();
+        SevenDtDAibot.RobustDebugger.Log("[Hacks] ESP settings loaded");
+        
+        // Initialize Canvas ESP Manager AFTER debugger is ready
         InitializeCanvasESP();
         
-        // Initialize RobustDebugger for better logging
-        SevenDtDAibot.RobustDebugger.Initialize();
         SevenDtDAibot.RobustDebugger.Log("[Hacks] Component started successfully");
     }
     
