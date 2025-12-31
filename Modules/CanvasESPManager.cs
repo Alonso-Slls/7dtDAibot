@@ -48,15 +48,18 @@ namespace Modules
         
         void Awake()
         {
+            RobustDebugger.Log("[CanvasESP] Awake called - starting initialization");
             InitializeCanvas();
+            RobustDebugger.Log("[CanvasESP] Canvas initialized");
             InitializePools();
+            RobustDebugger.Log("[CanvasESP] Pools initialized");
             CacheCamera();
-            
-            RobustDebugger.Log("[CanvasESP] Canvas-based ESP system initialized");
+            RobustDebugger.Log("[CanvasESP] Canvas-based ESP system initialized successfully");
         }
         
         void InitializeCanvas()
         {
+            RobustDebugger.Log("[CanvasESP] Initializing canvas...");
             if (espCanvas == null)
             {
                 // Create canvas if not assigned
@@ -64,6 +67,7 @@ namespace Modules
                 espCanvas = canvasObj.AddComponent<Canvas>();
                 espCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
                 espCanvas.sortingOrder = 1000; // Render on top
+                RobustDebugger.Log("[CanvasESP] Canvas created with ScreenSpaceOverlay mode");
                 
                 // Add CanvasScaler for resolution independence
                 CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
@@ -76,10 +80,12 @@ namespace Modules
                 canvasObj.AddComponent<GraphicRaycaster>();
                 
                 DontDestroyOnLoad(canvasObj);
+                RobustDebugger.Log("[CanvasESP] Canvas setup completed");
             }
             
             // Create prefabs if not assigned
             CreatePrefabs();
+            RobustDebugger.Log("[CanvasESP] Prefabs created");
         }
         
         void CreatePrefabs()
@@ -108,14 +114,60 @@ namespace Modules
             GameObject boxObj = new GameObject("ESP_Box");
             boxObj.transform.SetParent(espCanvas.transform);
             
-            Image image = boxObj.AddComponent<Image>();
-            image.color = Color.red;
-            image.raycastTarget = false; // Disable raycast for performance
+            // Create 4 separate lines for box outline
+            // Top line
+            GameObject topLine = new GameObject("TopLine");
+            topLine.transform.SetParent(boxObj.transform);
+            Image topImage = topLine.AddComponent<Image>();
+            topImage.color = Color.red;
+            topImage.raycastTarget = false;
+            RectTransform topRect = topLine.GetComponent<RectTransform>();
+            topRect.anchorMin = new Vector2(0, 1);
+            topRect.anchorMax = new Vector2(1, 1);
+            topRect.sizeDelta = new Vector2(0, 2); // 2px thick top line
+            topRect.anchoredPosition = Vector2.zero;
+            
+            // Bottom line
+            GameObject bottomLine = new GameObject("BottomLine");
+            bottomLine.transform.SetParent(boxObj.transform);
+            Image bottomImage = bottomLine.AddComponent<Image>();
+            bottomImage.color = Color.red;
+            bottomImage.raycastTarget = false;
+            RectTransform bottomRect = bottomLine.GetComponent<RectTransform>();
+            bottomRect.anchorMin = new Vector2(0, 0);
+            bottomRect.anchorMax = new Vector2(1, 0);
+            bottomRect.sizeDelta = new Vector2(0, 2); // 2px thick bottom line
+            bottomRect.anchoredPosition = Vector2.zero;
+            
+            // Left line
+            GameObject leftLine = new GameObject("LeftLine");
+            leftLine.transform.SetParent(boxObj.transform);
+            Image leftImage = leftLine.AddComponent<Image>();
+            leftImage.color = Color.red;
+            leftImage.raycastTarget = false;
+            RectTransform leftRect = leftLine.GetComponent<RectTransform>();
+            leftRect.anchorMin = new Vector2(0, 0);
+            leftRect.anchorMax = new Vector2(0, 1);
+            leftRect.sizeDelta = new Vector2(2, 0); // 2px thick left line
+            leftRect.anchoredPosition = Vector2.zero;
+            
+            // Right line
+            GameObject rightLine = new GameObject("RightLine");
+            rightLine.transform.SetParent(boxObj.transform);
+            Image rightImage = rightLine.AddComponent<Image>();
+            rightImage.color = Color.red;
+            rightImage.raycastTarget = false;
+            RectTransform rightRect = rightLine.GetComponent<RectTransform>();
+            rightRect.anchorMin = new Vector2(1, 0);
+            rightRect.anchorMax = new Vector2(1, 1);
+            rightRect.sizeDelta = new Vector2(2, 0); // 2px thick right line
+            rightRect.anchoredPosition = Vector2.zero;
             
             ESPBox espBox = boxObj.AddComponent<ESPBox>();
-            espBox.image = image;
+            espBox.image = topImage; // Use top image as reference
             
             boxObj.SetActive(false);
+            RobustDebugger.Log("[CanvasESP] Box outline prefab created with 4 border lines");
             return boxObj;
         }
         
@@ -203,22 +255,37 @@ namespace Modules
         // Main ESP rendering method - replaces the old esp_drawBox
         public void RenderESP(EntityEnemy[] entities)
         {
-            if (mainCamera == null) return;
+            RobustDebugger.Log($"[CanvasESP] RenderESP called with {entities.Length} entities");
+            
+            if (mainCamera == null) 
+            {
+                RobustDebugger.LogWarning("[CanvasESP] No camera available for ESP rendering");
+                return;
+            }
             
             // Clear previous frame's active elements
             ClearInactiveESP(entities);
             
             // Render each entity
+            int renderedCount = 0;
             foreach (EntityEnemy entity in entities)
             {
                 if (entity == null || !entity.IsAlive()) continue;
                 
                 RenderEntityESP(entity);
+                renderedCount++;
+            }
+            
+            if (renderedCount > 0)
+            {
+                RobustDebugger.Log($"[CanvasESP] Successfully rendered ESP for {renderedCount} entities");
             }
         }
         
         void RenderEntityESP(EntityEnemy entity)
         {
+            RobustDebugger.Log($"[CanvasESP] Rendering ESP for entity: {entity.EntityName}");
+            
             // Get or create ESP elements for this entity
             if (!activeESPElements.ContainsKey(entity))
             {
@@ -237,9 +304,12 @@ namespace Modules
             Vector3 w2s_head = mainCamera.WorldToScreenPoint(headPos);
             Vector3 w2s_feet = mainCamera.WorldToScreenPoint(feetPos);
             
+            RobustDebugger.Log($"[CanvasESP] Entity {entity.EntityName} - Head: {w2s_head}, Feet: {w2s_feet}");
+            
             // Visibility checks
             if (!IsVisibleOnScreen(w2s_head) || !IsVisibleOnScreen(w2s_feet))
             {
+                RobustDebugger.Log($"[CanvasESP] Entity {entity.EntityName} not visible on screen");
                 ReturnElementsToPool(elements);
                 return;
             }
@@ -248,6 +318,7 @@ namespace Modules
             float distance = Vector3.Distance(mainCamera.transform.position, entityPos);
             if (distance > SevenDtDAibot.ESPSettings.MaxESPDistance)
             {
+                RobustDebugger.Log($"[CanvasESP] Entity {entity.EntityName} too far: {distance}m");
                 ReturnElementsToPool(elements);
                 return;
             }
@@ -256,23 +327,32 @@ namespace Modules
             Vector2 screenHead = WorldToCanvasPoint(w2s_head);
             Vector2 screenFeet = WorldToCanvasPoint(w2s_feet);
             
+            RobustDebugger.Log($"[CanvasESP] Canvas coords - Head: {screenHead}, Feet: {screenFeet}");
+            
             // Calculate box dimensions
             float boxHeight = Mathf.Abs(screenFeet.y - screenHead.y);
             float boxWidth = CalculateBoxWidth(boxHeight, distance, config);
+            
+            RobustDebugger.Log($"[CanvasESP] Box dimensions - Width: {boxWidth}, Height: {boxHeight}");
             
             // Render ESP box
             RenderESPBox(elements, screenHead, boxWidth, boxHeight, Color.red, distance);
             
             // Render entity info
             RenderEntityInfo(elements, screenHead, screenFeet, entity, distance);
+            
+            RobustDebugger.Log($"[CanvasESP] Successfully rendered ESP for {entity.EntityName}");
         }
         
         void RenderESPBox(ESPElements elements, Vector2 screenHead, float width, float height, Color color, float distance)
         {
+            RobustDebugger.Log($"[CanvasESP] Rendering box at {screenHead} with size {width}x{height}");
+            
             // Get or create box
             if (elements.box == null)
             {
                 elements.box = GetBoxFromPool();
+                RobustDebugger.Log("[CanvasESP] Created new box from pool");
             }
             
             ESPBox espBox = elements.box;
@@ -283,7 +363,10 @@ namespace Modules
             rectTransform.anchoredPosition = screenHead;
             rectTransform.sizeDelta = new Vector2(width, height);
             
+            RobustDebugger.Log($"[CanvasESP] Box positioned at {rectTransform.anchoredPosition} with size {rectTransform.sizeDelta}");
+            
             espBox.gameObject.SetActive(true);
+            RobustDebugger.Log("[CanvasESP] Box activated and visible");
         }
         
         void RenderEntityInfo(ESPElements elements, Vector2 screenHead, Vector2 screenFeet, EntityEnemy entity, float distance)
@@ -423,7 +506,13 @@ namespace Modules
         Vector2 WorldToCanvasPoint(Vector3 worldToScreenPoint)
         {
             // Convert from Unity screen coordinates to canvas coordinates
-            return new Vector2(worldToScreenPoint.x, Screen.height - worldToScreenPoint.y);
+            // Unity screen: (0,0) = bottom-left, Canvas: (0,0) = center
+            float canvasX = worldToScreenPoint.x - (Screen.width / 2f);
+            float canvasY = worldToScreenPoint.y - (Screen.height / 2f);
+            
+            RobustDebugger.Log($"[CanvasESP] Coordinate conversion: Screen({worldToScreenPoint.x}, {worldToScreenPoint.y}) -> Canvas({canvasX}, {canvasY})");
+            
+            return new Vector2(canvasX, canvasY);
         }
         
         bool IsVisibleOnScreen(Vector3 worldToScreenPoint)
