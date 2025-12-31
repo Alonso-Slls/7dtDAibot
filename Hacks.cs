@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-public class Hacks : MonoBehaviour
+namespace Game_7D2D
+{
+    public class Hacks : MonoBehaviour
 {
     // Canvas ESP Manager
-    private Modules.CanvasESPManager canvasESPManager;
+    private CanvasESPManager canvasESPManager;
     
     // Global entity lists
     public static List<EntityEnemy> eEnemy = new List<EntityEnemy>();
@@ -32,7 +34,7 @@ public class Hacks : MonoBehaviour
         SevenDtDAibot.RobustDebugger.Initialize();
         SevenDtDAibot.RobustDebugger.Log("[Hacks] RobustDebugger initialized");
         
-        SevenDtDAibot.ESPSettings.LoadSettings();
+        ESPSettings.LoadSettings();
         SevenDtDAibot.RobustDebugger.Log("[Hacks] ESP settings loaded");
         
         // Initialize Canvas ESP Manager AFTER debugger is ready
@@ -46,7 +48,7 @@ public class Hacks : MonoBehaviour
         // Create and initialize Canvas ESP Manager
         GameObject canvasESPManagerObj = new GameObject("CanvasESPManager");
         canvasESPManagerObj.transform.SetParent(transform);
-        canvasESPManager = canvasESPManagerObj.AddComponent<Modules.CanvasESPManager>();
+        canvasESPManager = canvasESPManagerObj.AddComponent<CanvasESPManager>();
         
         DontDestroyOnLoad(canvasESPManagerObj);
         
@@ -92,7 +94,7 @@ public class Hacks : MonoBehaviour
         }
         
         // Handle hotkeys
-        Modules.Hotkeys.hotkeys();
+        Hotkeys.hotkeys();
         
         // Update entity lists periodically using coroutines
         if (Time.time - lastUpdateTime > UPDATE_INTERVAL && !isUpdatingEntities)
@@ -118,7 +120,7 @@ public class Hacks : MonoBehaviour
             }
             
             // Draw ESP using Canvas system if enabled
-            if (SevenDtDAibot.ESPSettings.ShowEnemyESP && canvasESPManager != null)
+            if (ESPSettings.ShowEnemyESP && canvasESPManager != null)
             {
                 try
                 {
@@ -172,20 +174,20 @@ public class Hacks : MonoBehaviour
         GUILayout.Space(5);
         
         // Draw toggles automatically with IMGUI
-        bool oldESP = SevenDtDAibot.ESPSettings.ShowEnemyESP;
-        float oldDistance = SevenDtDAibot.ESPSettings.MaxESPDistance;
+        bool oldESP = ESPSettings.ShowEnemyESP;
+        float oldDistance = ESPSettings.MaxESPDistance;
         
-        SevenDtDAibot.ESPSettings.ShowEnemyESP = GUILayout.Toggle(SevenDtDAibot.ESPSettings.ShowEnemyESP, 
-            $"Enemy ESP {(SevenDtDAibot.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
+        ESPSettings.ShowEnemyESP = GUILayout.Toggle(ESPSettings.ShowEnemyESP, 
+            $"Enemy ESP {(ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
         
         // Render distance slider
-        GUILayout.Label($"Render Distance: {SevenDtDAibot.ESPSettings.MaxESPDistance:F0}m");
-        SevenDtDAibot.ESPSettings.MaxESPDistance = GUILayout.HorizontalSlider(SevenDtDAibot.ESPSettings.MaxESPDistance, 50f, 300f);
+        GUILayout.Label($"Render Distance: {ESPSettings.MaxESPDistance:F0}m");
+        ESPSettings.MaxESPDistance = GUILayout.HorizontalSlider(ESPSettings.MaxESPDistance, 50f, 300f);
         
         // Save settings if they changed
-        if (oldESP != SevenDtDAibot.ESPSettings.ShowEnemyESP || Mathf.Abs(oldDistance - SevenDtDAibot.ESPSettings.MaxESPDistance) > 0.1f)
+        if (oldESP != ESPSettings.ShowEnemyESP || Mathf.Abs(oldDistance - ESPSettings.MaxESPDistance) > 0.1f)
         {
-            SevenDtDAibot.ESPSettings.SaveSettings();
+            ESPSettings.SaveSettings();
         }
         
         GUILayout.Space(10);
@@ -210,11 +212,11 @@ public class Hacks : MonoBehaviour
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Export Logs (F4)"))
         {
-            Modules.Hotkeys.ExportDebugLogs("manual_menu");
+            Hotkeys.ExportDebugLogs("manual_menu");
         }
         if (GUILayout.Button("Custom Export (F5)"))
         {
-            Modules.Hotkeys.ExportDebugLogs("custom_menu");
+            Hotkeys.ExportDebugLogs("custom_menu");
         }
         GUILayout.EndHorizontal();
         
@@ -332,4 +334,5 @@ public class Hacks : MonoBehaviour
             Debug.LogError($"[Hacks] Error during cleanup: {ex.Message}");
         }
     }
+}
 }

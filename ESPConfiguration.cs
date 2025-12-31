@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using UnityEngine;
+using SevenDtDAibot;
 
-namespace SevenDtDAibot
+namespace Game_7D2D
 {
     [Serializable]
     public class ESPConfiguration
