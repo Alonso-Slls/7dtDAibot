@@ -3,13 +3,8 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-namespace Game_7D2D
+public class Hacks : MonoBehaviour
 {
-    public class Hacks : MonoBehaviour
-{
-    // Canvas ESP Manager
-    private CanvasESPManager canvasESPManager;
-    
     // Global entity lists
     public static List<EntityEnemy> eEnemy = new List<EntityEnemy>();
     
@@ -29,30 +24,11 @@ namespace Game_7D2D
     void Start()
     {
         Debug.Log("Hacks component initialized");
+        Modules.ESPSettings.LoadSettings();
         
-        // Initialize RobustDebugger FIRST before anything that uses it
+        // Initialize RobustDebugger for better logging
         SevenDtDAibot.RobustDebugger.Initialize();
-        SevenDtDAibot.RobustDebugger.Log("[Hacks] RobustDebugger initialized");
-        
-        ESPSettings.LoadSettings();
-        SevenDtDAibot.RobustDebugger.Log("[Hacks] ESP settings loaded");
-        
-        // Initialize Canvas ESP Manager AFTER debugger is ready
-        InitializeCanvasESP();
-        
         SevenDtDAibot.RobustDebugger.Log("[Hacks] Component started successfully");
-    }
-    
-    void InitializeCanvasESP()
-    {
-        // Create and initialize Canvas ESP Manager
-        GameObject canvasESPManagerObj = new GameObject("CanvasESPManager");
-        canvasESPManagerObj.transform.SetParent(transform);
-        canvasESPManager = canvasESPManagerObj.AddComponent<CanvasESPManager>();
-        
-        DontDestroyOnLoad(canvasESPManagerObj);
-        
-        SevenDtDAibot.RobustDebugger.Log("[Hacks] Canvas ESP Manager initialized");
     }
     
     void Update()
@@ -94,7 +70,7 @@ namespace Game_7D2D
         }
         
         // Handle hotkeys
-        Hotkeys.hotkeys();
+        Modules.Hotkeys.hotkeys();
         
         // Update entity lists periodically using coroutines
         if (Time.time - lastUpdateTime > UPDATE_INTERVAL && !isUpdatingEntities)
@@ -119,25 +95,35 @@ namespace Game_7D2D
                 return;
             }
             
-            // Draw ESP using Canvas system if enabled
-            if (ESPSettings.ShowEnemyESP && canvasESPManager != null)
+            // Draw ESP if enabled and camera is available
+            if (Modules.ESPSettings.ShowEnemyESP)
             {
-                try
+                // Try multiple camera detection methods
+                Camera cam = Camera.main;
+                if (cam == null) cam = FindObjectOfType<Camera>();
+                
+                if (cam != null)
                 {
-                    // Convert list to array for Canvas ESP Manager
-                    EntityEnemy[] enemyArray = eEnemy.ToArray();
-                    canvasESPManager.RenderESP(enemyArray);
+                    int drawnCount = 0;
+                    foreach (var enemy in eEnemy)
+                    {
+                        if (enemy != null && enemy.IsAlive() && enemy.transform != null)
+                        {
+                            Modules.ESP.esp_drawBox(enemy, Color.red);
+                            drawnCount++;
+                        }
+                    }
                     
                     // Debug info
-                    if (enemyArray.Length > 0)
+                    if (drawnCount > 0)
                     {
-                        SevenDtDAibot.RobustDebugger.Log($"[Hacks] Rendered Canvas ESP for {enemyArray.Length} enemies");
+                        SevenDtDAibot.RobustDebugger.Log($"[Hacks] Drew ESP for {drawnCount} enemies");
                     }
                 }
-                catch (System.Exception ex)
+                else
                 {
-                    Debug.LogError($"[Hacks] Canvas ESP error: {ex.Message}");
-                    SevenDtDAibot.RobustDebugger.LogError($"[Hacks] Canvas ESP error: {ex.Message}");
+                    // Show camera error
+                    GUI.Label(new Rect(10, 30, 200, 20), "No camera found!");
                 }
             }
         }
@@ -174,20 +160,20 @@ namespace Game_7D2D
         GUILayout.Space(5);
         
         // Draw toggles automatically with IMGUI
-        bool oldESP = ESPSettings.ShowEnemyESP;
-        float oldDistance = ESPSettings.MaxESPDistance;
+        bool oldESP = Modules.ESPSettings.ShowEnemyESP;
+        float oldDistance = Modules.ESPSettings.MaxESPDistance;
         
-        ESPSettings.ShowEnemyESP = GUILayout.Toggle(ESPSettings.ShowEnemyESP, 
-            $"Enemy ESP {(ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
+        Modules.ESPSettings.ShowEnemyESP = GUILayout.Toggle(Modules.ESPSettings.ShowEnemyESP, 
+            $"Enemy ESP {(Modules.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]")}");
         
         // Render distance slider
-        GUILayout.Label($"Render Distance: {ESPSettings.MaxESPDistance:F0}m");
-        ESPSettings.MaxESPDistance = GUILayout.HorizontalSlider(ESPSettings.MaxESPDistance, 50f, 300f);
+        GUILayout.Label($"Render Distance: {Modules.ESPSettings.MaxESPDistance:F0}m");
+        Modules.ESPSettings.MaxESPDistance = GUILayout.HorizontalSlider(Modules.ESPSettings.MaxESPDistance, 50f, 300f);
         
         // Save settings if they changed
-        if (oldESP != ESPSettings.ShowEnemyESP || Mathf.Abs(oldDistance - ESPSettings.MaxESPDistance) > 0.1f)
+        if (oldESP != Modules.ESPSettings.ShowEnemyESP || Mathf.Abs(oldDistance - Modules.ESPSettings.MaxESPDistance) > 0.1f)
         {
-            ESPSettings.SaveSettings();
+            Modules.ESPSettings.SaveSettings();
         }
         
         GUILayout.Space(10);
@@ -212,11 +198,11 @@ namespace Game_7D2D
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Export Logs (F4)"))
         {
-            Hotkeys.ExportDebugLogs("manual_menu");
+            Modules.Hotkeys.ExportDebugLogs("manual_menu");
         }
         if (GUILayout.Button("Custom Export (F5)"))
         {
-            Hotkeys.ExportDebugLogs("custom_menu");
+            Modules.Hotkeys.ExportDebugLogs("custom_menu");
         }
         GUILayout.EndHorizontal();
         
@@ -334,5 +320,4 @@ namespace Game_7D2D
             Debug.LogError($"[Hacks] Error during cleanup: {ex.Message}");
         }
     }
-}
 }

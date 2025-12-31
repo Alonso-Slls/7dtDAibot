@@ -1,9 +1,7 @@
 using UnityEngine;
 using System.Collections;
-using SevenDtDAibot;
-using Game_7D2D;
 
-namespace Game_7D2D
+namespace Modules
 {
     public class Hotkeys
     {
@@ -25,8 +23,8 @@ namespace Game_7D2D
             // Toggle Enemy ESP with F1 key
             if (Input.GetKeyDown(KeyCode.F1))
             {
-                ESPSettings.ShowEnemyESP = !ESPSettings.ShowEnemyESP;
-                Debug.Log($"Enemy ESP {(ESPSettings.ShowEnemyESP ? "enabled" : "disabled")}");
+                SevenDtDAibot.ESPSettings.ShowEnemyESP = !SevenDtDAibot.ESPSettings.ShowEnemyESP;
+                Debug.Log($"Enemy ESP {(SevenDtDAibot.ESPSettings.ShowEnemyESP ? "enabled" : "disabled")}");
             }
             
             // Force update entities with F3 key

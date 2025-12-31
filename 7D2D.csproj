@@ -68,10 +68,6 @@
       <HintPath>Assm\UnityEngine.UI.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>Assm\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>Assm\Unity.Postprocessing.Runtime.dll</HintPath>
       <Private>false</Private>
@@ -95,15 +91,16 @@
   
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="EnhancedESPManager.cs" />
     <Compile Include="ESPConfiguration.cs" />
     <Compile Include="PerformanceMonitor.cs" />
     <Compile Include="RobustDebugger.cs" />
     <Compile Include="Hacks.cs" />
     <Compile Include="Render.cs" />
-    <Compile Include="Modules\CanvasESPManager.cs" />
     <Compile Include="Modules\ESP.cs" />
     <Compile Include="Modules\UI.cs" />
     <Compile Include="Modules\Hotkeys.cs" />
+    <Compile Include="Modules\ESPSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   

@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using UnityEngine;
-using SevenDtDAibot;
 
-namespace Game_7D2D
+namespace SevenDtDAibot
 {
     [Serializable]
     public class ESPConfiguration
@@ -218,64 +217,6 @@ namespace Game_7D2D
         public Color ToColor()
         {
             return new Color(r, g, b, a);
-        }
-    }
-    
-    // Static settings class for easy access
-    public static class ESPSettings
-    {
-        private static ESPConfiguration config = new ESPConfiguration();
-        
-        public static bool ShowEnemyESP
-        {
-            get { return config.showEnemies; }
-            set { config.showEnemies = value; }
-        }
-        
-        public static float MaxESPDistance
-        {
-            get { return config.maxESPDistance; }
-            set { config.maxESPDistance = Mathf.Clamp(value, 50f, 500f); }
-        }
-        
-        public static bool ShowDistance
-        {
-            get { return config.showDistance; }
-            set { config.showDistance = value; }
-        }
-        
-        public static void LoadSettings()
-        {
-            try
-            {
-                string configPath = Path.Combine(Application.dataPath, "..", "logs", "esp_config.json");
-                if (File.Exists(configPath))
-                {
-                    // TODO: Implement JSON loading when JsonUtility is available
-                    RobustDebugger.Log("[ESPSettings] Using default configuration (JSON loading disabled)");
-                }
-                else
-                {
-                    RobustDebugger.Log("[ESPSettings] Using default configuration");
-                }
-            }
-            catch (Exception ex)
-            {
-                RobustDebugger.LogError($"[ESPSettings] Failed to load configuration: {ex.Message}");
-            }
-        }
-        
-        public static void SaveSettings()
-        {
-            try
-            {
-                // TODO: Implement JSON saving when JsonUtility is available
-                RobustDebugger.Log("[ESPSettings] Configuration saving disabled");
-            }
-            catch (Exception ex)
-            {
-                RobustDebugger.LogError($"[ESPSettings] Failed to save configuration: {ex.Message}");
-            }
         }
     }
 }
