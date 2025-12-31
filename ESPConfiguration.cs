@@ -250,9 +250,8 @@ namespace SevenDtDAibot
                 string configPath = Path.Combine(Application.dataPath, "..", "logs", "esp_config.json");
                 if (File.Exists(configPath))
                 {
-                    string json = File.ReadAllText(configPath);
-                    config = JsonUtility.FromJson<ESPConfiguration>(json);
-                    RobustDebugger.Log("[ESPSettings] Configuration loaded successfully");
+                    // TODO: Implement JSON loading when JsonUtility is available
+                    RobustDebugger.Log("[ESPSettings] Using default configuration (JSON loading disabled)");
                 }
                 else
                 {
@@ -269,10 +268,8 @@ namespace SevenDtDAibot
         {
             try
             {
-                string configPath = Path.Combine(Application.dataPath, "..", "logs", "esp_config.json");
-                string json = JsonUtility.ToJson(config, true);
-                File.WriteAllText(configPath, json);
-                RobustDebugger.Log("[ESPSettings] Configuration saved successfully");
+                // TODO: Implement JSON saving when JsonUtility is available
+                RobustDebugger.Log("[ESPSettings] Configuration saving disabled");
             }
             catch (Exception ex)
             {

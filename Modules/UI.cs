@@ -55,20 +55,20 @@ namespace Modules
             GUI.color = Color.white;
             
             // Enemy ESP toggle with enhanced styling
-            string espStatus = ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]";
-            Color espColor = ESPSettings.ShowEnemyESP ? Color.green : Color.red;
+            string espStatus = SevenDtDAibot.ESPSettings.ShowEnemyESP ? "[ON]" : "[OFF]";
+            Color espColor = SevenDtDAibot.ESPSettings.ShowEnemyESP ? Color.green : Color.red;
             Render.DrawString(MENU_X + 10, MENU_Y + 40, $"● Enemy ESP {espStatus}", espColor);
             
             // Render Distance slider
             GUI.color = Color.white;
-            Render.DrawString(MENU_X + 10, MENU_Y + 65, $"Render Distance: {ESPSettings.MaxESPDistance:F0}m", Color.white);
+            Render.DrawString(MENU_X + 10, MENU_Y + 65, $"Render Distance: {SevenDtDAibot.ESPSettings.MaxESPDistance:F0}m", Color.white);
             
             // Draw slider background
             GUI.color = SLIDER_BG;
             GUI.DrawTexture(new Rect(MENU_X + SLIDER_X_OFFSET, MENU_Y + SLIDER_Y_OFFSET, SLIDER_WIDTH, SLIDER_HEIGHT), Texture2D.whiteTexture);
             
             // Draw slider fill based on current distance
-            float distancePercent = (ESPSettings.MaxESPDistance - 50f) / 250f; // 50-300m range
+            float distancePercent = (SevenDtDAibot.ESPSettings.MaxESPDistance - 50f) / 250f; // 50-300m range
             distancePercent = Mathf.Clamp01(distancePercent);
             GUI.color = SLIDER_FILL;
             GUI.DrawTexture(new Rect(MENU_X + SLIDER_X_OFFSET, MENU_Y + SLIDER_Y_OFFSET, SLIDER_WIDTH * distancePercent, SLIDER_HEIGHT), Texture2D.whiteTexture);
@@ -101,8 +101,8 @@ namespace Modules
                 if (mousePos.x >= MENU_X + 10 && mousePos.x <= MENU_X + 150 &&
                     mousePos.y >= MENU_Y + 40 && mousePos.y <= MENU_Y + 55)
                 {
-                    ESPSettings.ShowEnemyESP = !ESPSettings.ShowEnemyESP;
-                    ESPSettings.SaveSettings();
+                    SevenDtDAibot.ESPSettings.ShowEnemyESP = !SevenDtDAibot.ESPSettings.ShowEnemyESP;
+                    SevenDtDAibot.ESPSettings.SaveSettings();
                     Event.current.Use();
                 }
                 
@@ -120,7 +120,7 @@ namespace Modules
                 if (isDraggingSlider)
                 {
                     isDraggingSlider = false;
-                    ESPSettings.SaveSettings();
+                    SevenDtDAibot.ESPSettings.SaveSettings();
                     Event.current.Use();
                 }
             }
@@ -139,7 +139,7 @@ namespace Modules
             
             // Convert percent to distance (50-300m range)
             float newDistance = 50f + (percent * 250f);
-            ESPSettings.MaxESPDistance = newDistance;
+            SevenDtDAibot.ESPSettings.MaxESPDistance = newDistance;
         }
         
         public static void DrawWatermark()

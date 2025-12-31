@@ -246,7 +246,7 @@ namespace Modules
             
             // Distance check
             float distance = Vector3.Distance(mainCamera.transform.position, entityPos);
-            if (distance > ESPSettings.MaxESPDistance)
+            if (distance > SevenDtDAibot.ESPSettings.MaxESPDistance)
             {
                 ReturnElementsToPool(elements);
                 return;
@@ -451,7 +451,7 @@ namespace Modules
         float CalculateBoxWidth(float height, float distance, EntityConfig config)
         {
             float baseWidth = height * config.widthMultiplier;
-            float distanceScale = Mathf.Clamp01(1f - (distance / ESPSettings.MaxESPDistance) * 0.3f);
+            float distanceScale = Mathf.Clamp01(1f - (distance / SevenDtDAibot.ESPSettings.MaxESPDistance) * 0.3f);
             return baseWidth * (0.8f + distanceScale * 0.4f);
         }
         

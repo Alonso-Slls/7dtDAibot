@@ -27,7 +27,7 @@ public class Hacks : MonoBehaviour
     void Start()
     {
         Debug.Log("Hacks component initialized");
-        Modules.ESPSettings.LoadSettings();
+        SevenDtDAibot.ESPSettings.LoadSettings();
         
         // Initialize Canvas ESP Manager
         InitializeCanvasESP();
